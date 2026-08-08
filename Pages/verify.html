@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACCOUNT VERIFICATION | GHALLAB SHOP</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Remix Icon -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+
+    <!-- Compiled Tailwind CSS CLI -->
+    <link rel="stylesheet" href="../css/output.css">
+</head>
+
+<body class="bg-[var(--bg)] text-[var(--text)] antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Header Logo -->
+    <header class="py-6 border-b border-gh-line text-center w-full">
+        <a href="index.html" class="inline-flex items-center gap-3 group">
+            <i class="ri-flower-fill text-gh-gold text-3xl"></i>
+            <span
+                class="font-display tracking-[0.22em] text-xl text-[var(--text)] group-hover:text-gh-gold transition-colors">
+                GHALLAB SHOP
+            </span>
+        </a>
+    </header>
+
+    <!-- Verification Card Container -->
+    <main class="flex-1 flex items-center justify-center p-5 w-full mt-4">
+        <div
+            class="w-full max-w-sm bg-[var(--panel)] border border-gh-line rounded-2xl p-8 shadow-2xl text-center relative overflow-hidden">
+
+            <!-- Background Gold Glow -->
+            <div class="absolute -top-24 -left-24 w-48 h-48 bg-gh-gold/10 rounded-full blur-3xl pointer-events-none">
+            </div>
+
+            <!-- Loading State Container -->
+            <div id="iconContainer" class="flex flex-col items-center justify-center mb-6">
+                <div
+                    class="w-16 h-16 rounded-full bg-gh-gold/10 text-gh-gold border border-gh-gold/30 flex items-center justify-center text-3xl mb-4">
+                    <i id="statusIcon" class="ri-loader-4-line animate-spin"></i>
+                </div>
+                <p id="loadingText" class="text-sm text-[var(--text-dim)] font-medium">Verifying your email address...
+                </p>
+            </div>
+
+            <!-- Email Success State -->
+            <div id="emailtrue" class="w-full mx-auto text-center hidden mb-6" aria-live="polite">
+                <i class="ri-shield-check-fill text-green-500 text-6xl inline-block mb-6"></i>
+                <h2 class="text-lg font-semibold text-[var(--text)] mb-1">Email Verified Successfully</h2>
+                <p class="text-xs text-[var(--text-dim)]">You can now proceed to log in to your account.</p>
+            </div>
+
+            <!-- Email Fail State -->
+            <div id="emailfalse" class="w-full mx-auto text-center hidden mb-6" aria-live="assertive">
+                <i class="ri-error-warning-fill text-red-600 text-6xl inline-block mb-3"></i>
+                <h2 class="text-lg font-semibold text-[var(--text)] mb-1">Verification Failed</h2>
+                <p class="text-xs text-[var(--text-dim)]">Invalid or expired verification link.</p>
+            </div>
+
+            <!-- Action Button -->
+            <a id="actionBtn" href="../index.html?action=login"
+                class="inline-flex items-center justify-center gap-2 w-full h-11 rounded-lg bg-gh-gold text-black text-sm tracking-widest font-medium hover:bg-gh-goldlight transition-colors mt-2">
+                <span>RETURN TO STORE</span>
+                <i class="ri-arrow-right-line"></i>
+            </a>
+
+        </div>
+    </main>
+
+    <!-- Footer Copyright -->
+    <footer class="py-6 border-t border-gh-line text-center text-xs text-[var(--text-dim)] w-full">
+        <p>© 2026 Ghallab Shop. All rights reserved.</p>
+    </footer>
+
+    <script type="module" src="../js/Verify.js"></script>
+
+</body>
+
+</html>

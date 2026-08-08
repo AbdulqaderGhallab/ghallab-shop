@@ -1,0 +1,458 @@
+/* ── Tailwind CSS Directives ── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Color Themes ── */
+:root {
+  --bg: #0a0a0a;
+  --bg-alt: #111111;
+  --text: #f7f4ec;
+  --text-dim: rgba(247, 244, 236, 0.62);
+  --line: rgba(201, 162, 74, 0.22);
+  --panel: rgba(0, 0, 0, 0.42);
+}
+
+html.light {
+  --bg: #f7f4ec;
+  --bg-alt: #efe9d8;
+  --text: #141105;
+  --text-dim: rgba(20, 17, 5, 0.62);
+  --line: rgba(138, 106, 31, 0.30);
+  --panel: rgba(255, 255, 255, 0.55);
+}
+
+/* ── Base Styles ── */
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Tajawal', 'Jost', sans-serif;
+}
+
+/* Arabic font override */
+html[lang="ar"] [data-i18n] {
+  font-family: 'Cairo', 'Tajawal', sans-serif !important;
+}
+
+::selection {
+  background: rgba(201, 162, 74, 0.35);
+  color: #fff;
+}
+
+/* ── Infinite Marquee ── */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: scroll-left 38s linear infinite;
+}
+
+.marquee-track.slow {
+  animation-duration: 55s;
+}
+
+.marquee-wrap:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes scroll-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes scroll-right {
+  from { transform: translateX(0); }
+  to   { transform: translateX(50%); }
+}
+
+/* ── Visual Masking & Clip Paths ── */
+.edge-fade {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+}
+
+.hero-clip {
+  clip-path: polygon(0 4.5%, 100% 0%, 100% 96%, 0% 100%);
+}
+
+.hairline {
+  background: linear-gradient(90deg, transparent, var(--line) 20%, var(--line) 80%, transparent);
+  height: 1px;
+}
+
+/* ── Animated Seal Component ── */
+.seal {
+  width: 104px;
+  height: 104px;
+  border-radius: 9999px;
+  border: 1px solid rgba(201, 162, 74, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: radial-gradient(circle at 50% 40%, rgba(201, 162, 74, 0.12), transparent 70%);
+}
+
+.seal::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 9999px;
+  border: 1px solid rgba(201, 162, 74, 0.28);
+  animation: spin-slow 26s linear infinite;
+}
+
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Scroll Triggered Animations ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity .9s ease, transform .9s ease;
+}
+
+.reveal.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Utilities & Typography ── */
+.stat-num {
+  font-variant-numeric: tabular-nums;
+}
+
+.gold-grad {
+  background: linear-gradient(120deg, #8a6a1f, #e9d38f 35%, #c9a24a 60%, #8a6a1f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glow {
+  background: radial-gradient(60% 60% at 50% 40%, rgba(201, 162, 74, 0.22), transparent 70%);
+}
+
+/* ── Inline Expanding Panels (Accordions) ── */
+.acc-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows .45s ease;
+}
+
+.acc-panel.open {
+  grid-template-rows: 1fr;
+}
+
+.acc-panel > div {
+  overflow: hidden;
+}
+
+/* ── Buttons & Interactive Elements ── */
+.icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 9999px;
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color .2s ease, color .2s ease, background .2s ease, box-shadow .2s ease, transform .2s ease;
+  color: var(--text);
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+.icon-btn:hover {
+  border-color: #c9a24a;
+  color: #c9a24a;
+  box-shadow: 0 2px 10px rgba(201, 162, 74, 0.18);
+}
+
+.icon-btn:active {
+  transform: scale(0.93);
+}
+
+.icon-btn.is-active {
+  border-color: #c9a24a;
+  color: #c9a24a;
+  background: rgba(201, 162, 74, 0.10);
+  box-shadow: 0 0 0 3px rgba(201, 162, 74, 0.12), 0 2px 10px rgba(201, 162, 74, 0.2);
+}
+
+.badge {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  background: #c9a24a;
+  color: #0a0a0a;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mode-btn {
+  transition: all .25s ease;
+}
+
+.mode-btn:not(.active):hover {
+  color: #c9a24a;
+  background: rgba(201, 162, 74, 0.08);
+}
+
+.mode-btn.active {
+  background: #c9a24a;
+  color: #0a0a0a;
+  box-shadow: 0 1px 1px rgba(255, 255, 255, 0.35) inset, 0 4px 14px rgba(201, 162, 74, 0.28);
+}
+
+.like-btn.liked i {
+  color: #c9a24a;
+}
+
+.like-btn.liked i:before {
+  content: "\ee0e"; /* ri-heart-fill */
+}
+
+.pill {
+  border: 1px solid var(--line);
+  border-radius: 9999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .2s ease;
+  user-select: none;
+}
+
+.pill.active,
+.pill:hover {
+  border-color: #c9a24a;
+  color: #c9a24a;
+  background: rgba(201, 162, 74, 0.08);
+}
+
+/* ── Call-to-Action Buttons ── */
+.btn-gold {
+  background: linear-gradient(120deg, #d9b667, #c9a24a 55%, #b3893b);
+  color: #0a0a0a;
+  box-shadow: 0 1px 1px rgba(255, 255, 255, 0.35) inset, 0 6px 18px rgba(201, 162, 74, 0.25);
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+
+.btn-gold:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 1px 1px rgba(255, 255, 255, 0.4) inset, 0 10px 24px rgba(201, 162, 74, 0.32);
+  transform: translateY(-1px);
+}
+
+.btn-gold:active {
+  transform: translateY(0) scale(0.98);
+  filter: brightness(0.98);
+}
+
+.btn-outline-gold {
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+}
+
+.btn-outline-gold:hover {
+  box-shadow: 0 6px 16px rgba(201, 162, 74, 0.16);
+}
+
+.btn-outline-gold:active {
+  transform: scale(0.97);
+}
+
+/* ── Product Cards & Settings ── */
+.product-card {
+  transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(201, 162, 74, 0.45);
+  box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(201, 162, 74, 0.08);
+}
+
+html.light .product-card:hover {
+  box-shadow: 0 18px 40px -16px rgba(20, 17, 5, 0.25), 0 0 0 1px rgba(138, 106, 31, 0.1);
+}
+
+.p-desc-overlay {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.25) 60%, transparent 100%);
+}
+
+.settings-card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 22px;
+  background: linear-gradient(180deg, rgba(201, 162, 74, 0.05), transparent 60%);
+  transition: border-color .25s ease, box-shadow .25s ease;
+}
+
+.settings-card:hover {
+  border-color: rgba(201, 162, 74, 0.4);
+  box-shadow: 0 10px 26px -14px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Switches & Inputs ── */
+.gh-switch {
+  width: 42px;
+  height: 24px;
+  border-radius: 9999px;
+  border: 1px solid var(--line);
+  position: relative;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.15);
+  transition: background .2s ease, border-color .2s ease;
+  flex-shrink: 0;
+}
+
+html.light .gh-switch {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.gh-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: var(--text-dim);
+  transition: transform .25s ease, background .25s ease;
+}
+
+.gh-switch.on {
+  border-color: #c9a24a;
+  background: rgba(201, 162, 74, 0.18);
+}
+
+.gh-switch.on::after {
+  transform: translateX(-18px);
+  background: #c9a24a;
+}
+
+input[type="range"] {
+  accent-color: #c9a24a;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+#panelSearch input {
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+#panelSearch input:focus {
+  box-shadow: 0 0 0 3px rgba(201, 162, 74, 0.12);
+}
+
+.qty-stepper {
+  transition: border-color .2s ease;
+}
+
+.qty-stepper:focus-within {
+  border-color: #c9a24a;
+}
+
+/* Remove number input spinners */
+.qty-input {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Disabled states */
+button:disabled,
+input:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.qty-dec:disabled,
+.qty-inc:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+/* ── Focus & Scrollbar ── */
+:focus-visible {
+  outline: 1.5px solid rgba(201, 162, 74, 0.75);
+  outline-offset: 2px;
+}
+
+button,
+.pill,
+.icon-btn,
+.mode-btn {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(201, 162, 74, 0.35);
+  border-radius: 9999px;
+}
+
+/* ── Media Queries ── */
+@media (max-width: 400px) {
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  #headerActions {
+    gap: 4px;
+  }
+
+  header .max-w-7xl.h-20 {
+    gap: 8px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .seal::before {
+    animation: none !important;
+  }
+
+  .reveal {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .product-card,
+  .btn-gold,
+  .btn-outline-gold,
+  .icon-btn {
+    transition: none !important;
+  }
+}

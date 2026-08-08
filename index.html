@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="app_title">GHALLAB SHOP</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Google Fonts (Amiri & Cairo) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Cairo:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Remix Icon -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+
+    <!-- Compiled Tailwind CSS CLI -->
+    <link rel="stylesheet" href="./css/output.css">
+
+    <!-- EmailJS SDK Initialization -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function () {
+            // Initialize EmailJS with Public Key
+            emailjs.init("PrbrZsyo2fCxu6YRD");
+        })();
+    </script>
+</head>
+
+<body id="body" class="bg-[var(--bg)] text-[var(--text)] antialiased">
+
+    <!-- Announcement Ticker -->
+    <div dir="ltr" lang="en"
+        class="marquee-wrap w-full bg-black text-gh-gold border-b border-gh-line overflow-hidden select-none">
+        <div class="edge-fade overflow-hidden">
+            <div
+                class="marquee-track slow top-marquee-track flex items-center gap-10 font-display text-[11px] md:text-xs tracking-[0.28em] py-2.5">
+
+                <!-- Marquee Track (First Loop) -->
+                <div class="flex items-center gap-10">
+                    <span>AURELIA COLLECTION</span><span class="text-gh-goldlight/50">◆</span>
+                    <span>NOIR SILK EDIT</span><span class="text-gh-goldlight/50">◆</span>
+                    <span>GOLDEN HOUR DENIM</span><span class="text-gh-goldlight/50">◆</span>
+                    <span>ROYAL CASHMERE LINE</span><span class="text-gh-goldlight/50">◆</span>
+                    <span>OBSIDIAN LEATHER SERIES</span><span class="text-gh-goldlight/50">◆</span>
+                    <span>IMPERIAL LINEN</span><span class="text-gh-goldlight/50">◆</span>
+                    <span>MIDNIGHT VELVET DROP</span><span class="text-gh-goldlight/50">◆</span>
+                    <span>HERITAGE TAILORING</span><span class="text-gh-goldlight/50">◆</span>
+                </div>
+
+                <!-- Marquee Track (Seamless Loop Duplicate) -->
+                <div class="flex items-center gap-10">
+                    <span>AURELIA COLLECTION</span><span class="text-gh-goldlight/50">◆</span>
+                    <span>NOIR SILK EDIT</span><span class="text-gh-goldlight/50">◆</span>
+                    <span>GOLDEN HOUR DENIM</span><span class="text-gh-goldlight/50">◆</span>
+                    <span>ROYAL CASHMERE LINE</span><span class="text-gh-goldlight/50">◆</span>
+                    <span>OBSIDIAN LEATHER SERIES</span><span class="text-gh-goldlight/50">◆</span>
+                    <span>IMPERIAL LINEN</span><span class="text-gh-goldlight/50">◆</span>
+                    <span>MIDNIGHT VELVET DROP</span><span class="text-gh-goldlight/50">◆</span>
+                    <span>HERITAGE TAILORING</span><span class="text-gh-goldlight/50">◆</span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <!-- Main Navigation Header -->
+        <header class="sticky top-0 z-40 backdrop-blur [.light_&]:bg-[#f7f4ec] border-b border-gh-line">
+            <div class="max-w-7xl mx-auto px-5 md:px-10 h-20 flex items-center justify-between">
+
+                <!-- Brand Logo -->
+                <h1 class="flex items-center gap-3 group">
+                    <i class="ri-flower-fill text-gh-gold text-4xl"></i>
+                    <span
+                        class="font-display tracking-[0.22em] text-lg md:text-xl text-[var(--text)] group-hover:text-gh-gold transition-colors"
+                        data-i18n="nav.brand_name">GHALLAB SHOP</span>
+                </h1>
+
+                <!-- Header Action Controls -->
+                <div class="flex items-center gap-2 md:gap-4">
+
+                    <!-- Language Selector Toggle -->
+                    <button id="langToggle" title="Switch language" aria-label="Switch language"
+                        class="w-10 h-10 rounded-full border border-gh-line font-bold flex text-[var(--text)] items-center justify-center text-sm tracking-widest hover:border-gh-gold hover:text-gh-gold transition-colors">
+                        E
+                    </button>
+
+                    <!-- Theme Toggle Button -->
+                    <button id="themeToggle" title="Toggle day / night" aria-label="Toggle day or night mode"
+                        class="w-10 h-10 rounded-full border border-gh-line flex items-center justify-center hover:border-gh-gold hover:text-gh-gold transition-colors">
+                        <i id="iconMoon" class="ri-moon-fill text-sm text-[var(--text)]"></i>
+                        <i id="iconSun" class="ri-sun-fill text-sm text-[var(--text)]"></i>
+                    </button>
+
+                    <!-- Authentication Trigger Buttons -->
+                    <button id="openLogin"
+                        class="hidden sm:inline-flex items-center gap-2 px-5 h-10 rounded-full border border-gh-gold/60 text-gh-gold text-sm tracking-wide hover:bg-gh-gold hover:text-black transition-colors"
+                        data-i18n="nav.sign_in">
+                        Sign In
+                    </button>
+                    <button id="openLoginMobile" aria-label="Sign in"
+                        class="sm:hidden w-10 h-10 rounded-full border border-gh-gold/60 text-gh-gold flex items-center justify-center">
+                        <i class="ri-user-fill"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Login Modal -->
+        <div id="loginModal" class="fixed inset-0 z-50 hidden">
+            <!-- Backdrop Overlay -->
+            <div id="loginBackdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+
+            <!-- Modal Content Container -->
+            <div class="relative h-full flex items-center justify-center px-5">
+                <div class="w-full max-w-sm bg-[var(--bg)] border border-gh-line rounded-2xl p-8 shadow-2xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="font-display text-lg tracking-widest text-gh-gold" data-i18n="auth.login_title">SIGN
+                            IN</h3>
+                        <button id="closeLogin" aria-label="Close modal"
+                            class="text-[var(--text-dim)] hover:text-gh-gold text-xl leading-none">&times;</button>
+                    </div>
+                    <form class="space-y-4" onsubmit="event.preventDefault();">
+                        <div>
+                            <label class="block text-xs tracking-widest text-[var(--text-dim)] mb-1.5"
+                                data-i18n="auth.email_label">EMAIL</label>
+                            <input id="loginEmail" type="email" placeholder="you@example.com" name="loginEmail"
+                                class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-2.5 text-sm focus:border-gh-gold outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs tracking-widest text-[var(--text-dim)] mb-1.5"
+                                data-i18n="auth.password_label">PASSWORD</label>
+                            <div class="relative">
+                                <input id="loginPassword" type="password" placeholder="••••••••" name="loginPassword"
+                                    class="w-full bg-transparent border border-gh-line rounded-lg ps-4 pe-10 py-2.5 text-sm focus:border-gh-gold outline-none">
+                                <button type="button" id="togglePassword" aria-label="Toggle password visibility"
+                                    class="absolute top-1/2 end-4 -translate-y-1/2 text-[var(--text-dim)] hover:text-gh-gold">
+                                    <i id="loginEyeIcon" class="ri-eye-fill"></i>
+                                    <i id="loginEyeOffIcon" class="ri-eye-off-fill hidden"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="submit" id="loginSubmit"
+                            class="w-full h-11 rounded-lg bg-gh-gold text-black text-sm tracking-widest font-medium hover:bg-gh-goldlight transition-colors"
+                            data-i18n="auth.login_button">ENTER</button>
+                    </form>
+                    <p class="text-center text-xs text-[var(--text-dim)] mt-5">
+                        <span data-i18n="auth.new_user_prompt">New to Ghallab Shop?</span>
+                        <a href="#" id="switchToRegister" data-i18n="auth.create_account_link"
+                            class="text-gh-gold hover:underline">Create an account</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Modal -->
+        <div id="registerModal" class="fixed inset-0 z-50 hidden">
+            <!-- Backdrop Overlay -->
+            <div id="registerBackdrop" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+
+            <!-- Modal Content Container -->
+            <div class="relative h-full flex items-center justify-center px-5 py-6 overflow-y-auto">
+                <div class="w-full max-w-sm bg-[var(--bg)] border border-gh-line rounded-2xl p-8 shadow-2xl">
+                    <!-- Modal Header -->
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="font-display text-lg tracking-widest text-gh-gold" data-i18n="auth.register_title">
+                            CREATE ACCOUNT
+                        </h3>
+                        <button id="closeRegister" aria-label="Close registration modal"
+                            class="text-[var(--text-dim)] hover:text-gh-gold text-xl leading-none transition-colors">&times;</button>
+                    </div>
+
+                    <!-- Registration Form -->
+                    <form class="space-y-4" onsubmit="event.preventDefault();" id="registerForm">
+                        <!-- Full Name -->
+                        <div>
+                            <label class="block text-xs tracking-widest text-[var(--text-dim)] mb-1.5"
+                                data-i18n="auth.fullname_label">FULL NAME</label>
+                            <input type="text" placeholder="John Doe" id="registerFullName" name="registerFullName"
+                                class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-2.5 text-sm focus:border-gh-gold outline-none transition-colors"
+                                required>
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label class="block text-xs tracking-widest text-[var(--text-dim)] mb-1.5"
+                                data-i18n="auth.email_label">EMAIL ADDRESS</label>
+                            <div id="emailVerification" class="relative">
+                                <input type="email" placeholder="you@example.com" id="registerEmail"
+                                    name="registerEmail"
+                                    class="w-full bg-transparent border border-gh-line rounded-lg ps-4 pe-[4.5rem] py-2.5 text-sm focus:border-gh-gold outline-none transition-colors"
+                                    required>
+                                <button
+                                    class="absolute top-1/2 end-0 -translate-y-1/2 h-full text-[var(--text-dim)] text-gh-gold hover:bg-gh-gold hover:text-black border-2 border-gh-gold rounded-md py-1 px-3 focus:outline-none"
+                                    type="button" id="verifyEmail" data-i18n="auth.verify_email">VERIFY</button>
+                            </div>
+
+                            <div id="resendEmailContainer" class="text-xs w-full my-1 mx-auto text-center gap-4 hidden">
+                                <p id="emailVerificationMessage" class="text-2xl text-gh-gold mt-1"
+                                    data-i18n="auth.check_email">Check Your Inbox</p>
+                                <div>
+                                    <button id="resendEmail" type="button"
+                                        class="text-gh-gold hover:underline hover:text-red-600"
+                                        data-i18n="auth.resend_email">Resend Email</button>
+                                    <span id="resendEmailTimer"></span>
+                                </div>
+                                <button class="text-gh-gold hover:underline hover:text-red-600" type="button"
+                                    id="returnEmailMessage" data-i18n="auth.return_email_message">Back</button>
+                            </div>
+                            <div class="w-full mx-auto text-center hidden" id="emailVerifiedIcon">
+                                <i class="ri-shield-check-fill text-green-500 text-6xl"></i>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div>
+                            <label class="block text-xs tracking-widest text-[var(--text-dim)] mb-1.5"
+                                data-i18n="auth.password_label">PASSWORD</label>
+                            <div class="relative">
+                                <input type="password" placeholder="••••••••" id="registerPassword"
+                                    name="registerPassword"
+                                    class="w-full bg-transparent border border-gh-line rounded-lg ps-4 pe-10 py-2.5 text-sm focus:border-gh-gold outline-none transition-colors"
+                                    required>
+                                <button type="button" id="toggleRegisterPassword"
+                                    aria-label="Toggle password visibility"
+                                    class="absolute top-1/2 end-4 -translate-y-1/2 text-[var(--text-dim)] hover:text-gh-gold">
+                                    <i id="eye" class="ri-eye-fill"></i>
+                                    <i id="noeye" class="ri-eye-off-fill hidden"></i>
+                                </button>
+                            </div>
+                            <div id="registerPasswordRequirements" class="mt-2 text-xs hidden">
+                                <p class="text-gray-600 mb-1" data-i18n="auth.password_requirements">Password must
+                                    contain:</p>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li id="registerPasswordRequirementsList0" class="text-red-600"
+                                        data-i18n="auth.password_requirements_list.0">At least 8 characters</li>
+                                    <li id="registerPasswordRequirementsList1" class="text-red-600"
+                                        data-i18n="auth.password_requirements_list.1">Uppercase letters</li>
+                                    <li id="registerPasswordRequirementsList2" class="text-red-600"
+                                        data-i18n="auth.password_requirements_list.2">Lowercase letters</li>
+                                    <li id="registerPasswordRequirementsList3" class="text-red-600"
+                                        data-i18n="auth.password_requirements_list.3">Numbers</li>
+                                    <li id="registerPasswordRequirementsList4" class="text-red-600"
+                                        data-i18n="auth.password_requirements_list.4">Special characters</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Terms & Conditions Checkbox -->
+                        <div class="flex items-center gap-2 pt-1">
+                            <input type="checkbox" id="terms" required name="terms"
+                                class="rounded border-gh-line accent-gh-gold focus:ring-0">
+                            <label for="terms" class="text-xs text-[var(--text-dim)] cursor-pointer">
+                                <span data-i18n="auth.terms_agree">I agree to the</span>
+                                <a href="#" class="text-gh-gold hover:underline" data-i18n="auth.terms_link"
+                                    id="termsLink">Terms & Privacy</a>
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit"
+                            class="w-full h-11 rounded-lg bg-gh-gold text-black text-sm tracking-widest font-medium hover:bg-gh-goldlight transition-colors mt-2"
+                            data-i18n="auth.register_button" id="registerSubmit">CREATE ACCOUNT</button>
+                    </form>
+
+                    <!-- Footer Link -->
+                    <p class="text-center text-xs text-[var(--text-dim)] mt-5">
+                        <span data-i18n="auth.existing_user_prompt">Already have an account?</span>
+                        <a href="#" class="text-gh-gold hover:underline" data-i18n="auth.login_link"
+                            id="switchToLogin">Sign in</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hero Section -->
+        <section id="top" class="relative w-full h-[92vh] min-h-[560px] overflow-hidden bg-black">
+            <!-- Background Video Container -->
+            <div class="absolute inset-0 hero-clip">
+                <video id="heroVideo" class="w-full h-full object-cover opacity-80" autoplay muted loop playsinline
+                    disablepictureinpicture controlslist="nodownload noplaybackrate">
+                    <source src="videos/my-shop-video.mp4" type="video/mp4">
+                </video>
+
+                <!-- Overlay Gradients & Glow Effects -->
+                <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/60 to-black"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/30"></div>
+                <div class="absolute inset-0 glow"></div>
+            </div>
+
+            <!-- Main Hero Content -->
+            <div class="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+                <span class="reveal font-serif text-gh-goldlight/85 tracking-[0.4em] text-xs md:text-sm mb-5"
+                    data-i18n="hero.subtitle">THE HOUSE OF MODERN TAILORING</span>
+
+                <h1 class="reveal font-display gold-grad text-[15vw] leading-none sm:text-7xl md:text-8xl tracking-[0.06em] drop-shadow-[0_0_40px_rgba(201,162,74,0.25)]"
+                    data-i18n="hero.title">
+                    GHALLAB SHOP
+                </h1>
+
+                <p class="reveal font-serif text-[rgba(247,244,236,0.62)] text-base md:text-lg mt-6 max-w-xl"
+                    data-i18n="hero.description">
+                    Curated ready-to-wear, cut for those who dress with intention.
+                </p>
+
+                <a href="#collections"
+                    class="reveal mt-9 inline-flex items-center gap-3 px-8 h-12 rounded-full border border-gh-gold text-gh-gold text-sm tracking-[0.2em] hover:bg-gh-gold hover:text-black transition-colors"
+                    data-i18n="hero.cta" id="heroCtaLink">
+                    DISCOVER THE EDIT
+                </a>
+            </div>
+
+            <!-- Scroll Indicator -->
+            <div
+                class="absolute bottom-7 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 text-gh-gold/70">
+                <span class="text-[10px] tracking-[0.3em]" data-i18n="hero.scroll_cue">SCROLL</span>
+                <span class="w-px h-8 bg-gradient-to-b from-gh-gold to-transparent"></span>
+            </div>
+        </section>
+
+        <!-- Achievements Section -->
+        <section id="collections" class="relative bg-black py-24 md:py-32 px-6 overflow-hidden">
+            <!-- Background Glow Effect -->
+            <div class="absolute inset-0 glow opacity-70"></div>
+
+            <div class="relative max-w-6xl mx-auto text-center">
+                <!-- Section Header -->
+                <span class="reveal font-serif text-gh-gold/80 tracking-[0.35em] text-xs md:text-sm"
+                    data-i18n="achievements.since">SINCE 2014</span>
+                <h2 class="reveal font-display text-3xl md:text-5xl tracking-[0.08em] mt-4 text-gh-cream"
+                    data-i18n="achievements.title">OUR ACHIEVEMENTS</h2>
+                <div class="reveal hairline w-24 mx-auto mt-6"></div>
+
+                <!-- Statistics Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-6 mt-16">
+                    <div class="reveal">
+                        <p dir="ltr" class="stat-num font-display text-4xl md:text-5xl gold-grad">90,000+</p>
+                        <p class="mt-3 text-xs md:text-sm tracking-[0.2em] text-[rgba(247,244,236,0.62)]"
+                            data-i18n="achievements.reviews">VERIFIED REVIEWS</p>
+                    </div>
+                    <div class="reveal">
+                        <p dir="ltr" class="stat-num font-display text-4xl md:text-5xl gold-grad">1.2M+</p>
+                        <p class="mt-3 text-xs md:text-sm tracking-[0.2em] text-[rgba(247,244,236,0.62)]"
+                            data-i18n="achievements.products">PRODUCTS LISTED</p>
+                    </div>
+                    <div class="reveal">
+                        <p dir="ltr" class="stat-num font-display text-4xl md:text-5xl gold-grad">3.5M+</p>
+                        <p class="mt-3 text-xs md:text-sm tracking-[0.2em] text-[rgba(247,244,236,0.62)]"
+                            data-i18n="achievements.orders">ORDERS FULFILLED</p>
+                    </div>
+                    <div class="reveal">
+                        <p dir="ltr" class="stat-num font-display text-4xl md:text-5xl gold-grad">15,000+</p>
+                        <p class="mt-3 text-xs md:text-sm tracking-[0.2em] text-[rgba(247,244,236,0.62)]"
+                            data-i18n="achievements.sellers">TRUSTED SELLERS</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Partner Strip Section -->
+        <section dir="ltr" lang="en" class="relative bg-[var(--bg)] pt-4">
+            <div
+                class="marquee-wrap max-w-6xl mx-auto rounded-t-[64px] md:rounded-t-[96px] border border-gh-line border-b-0 bg-[var(--panel)] backdrop-blur-md overflow-hidden py-10 md:py-14">
+
+                <!-- Section Title -->
+                <p class="text-center text-[10px] md:text-xs tracking-[0.35em] text-gh-gold/80 mb-8"
+                    data-i18n="partners.title">IN PARTNERSHIP WITH HOUSES WE ADMIRE</p>
+
+                <!-- Marquee Track Container -->
+                <div class="edge-fade overflow-hidden">
+                    <div class="marquee-track slow items-center">
+                        <!-- Track Group 1 -->
+                        <div
+                            class="flex items-center gap-16 pr-16 font-display text-lg md:text-2xl tracking-widest text-[var(--text)]/80">
+                            <span>MAISON VALEROSE</span>
+                            <span class="text-gh-gold/40">•</span>
+                            <span>NORDLYS ATELIER</span>
+                            <span class="text-gh-gold/40">•</span>
+                            <span>CASA D'ORO</span>
+                            <span class="text-gh-gold/40">•</span>
+                            <span>STERLING &amp; VANE</span>
+                            <span class="text-gh-gold/40">•</span>
+                            <span>LUMIÈRE HOUSE</span>
+                            <span class="text-gh-gold/40">•</span>
+                            <span>AURELIO MILANO</span>
+                            <span class="text-gh-gold/40">•</span>
+                            <span>BLACKWOOD &amp; CO</span>
+                            <span class="text-gh-gold/40">•</span>
+                            <span>VELLUTO ROMA</span>
+                            <span class="text-gh-gold/40">•</span>
+                        </div>
+
+                        <!-- Track Group 2 (Duplicated for Seamless Loop) -->
+                        <div
+                            class="flex items-center gap-16 pr-16 font-display text-lg md:text-2xl tracking-widest text-[var(--text)]/80">
+                            <span>MAISON VALEROSE</span>
+                            <span class="text-gh-gold/40">•</span>
+                            <span>NORDLYS ATELIER</span>
+                            <span class="text-gh-gold/40">•</span>
+                            <span>CASA D'ORO</span>
+                            <span class="text-gh-gold/40">•</span>
+                            <span>STERLING &amp; VANE</span>
+                            <span class="text-gh-gold/40">•</span>
+                            <span>LUMIÈRE HOUSE</span>
+                            <span class="text-gh-gold/40">•</span>
+                            <span>AURELIO MILANO</span>
+                            <span class="text-gh-gold/40">•</span>
+                            <span>BLACKWOOD &amp; CO</span>
+                            <span class="text-gh-gold/40">•</span>
+                            <span>VELLUTO ROMA</span>
+                            <span class="text-gh-gold/40">•</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section class="relative bg-[var(--bg)] py-24 md:py-32 px-6">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center">
+                    <!-- Section Header -->
+                    <span class="reveal font-serif text-gh-gold/80 tracking-[0.35em] text-xs md:text-sm"
+                        data-i18n="testimonials.subtitle">WORDS FROM OUR CLIENTELE</span>
+                    <h2 class="reveal font-display text-3xl md:text-5xl tracking-[0.08em] mt-4"
+                        data-i18n="testimonials.title">
+                        TESTIMONIALS</h2>
+                    <div class="reveal hairline w-24 mx-auto mt-6"></div>
+                </div>
+
+                <!-- Reviews Grid -->
+                <div class="grid md:grid-cols-3 gap-6 md:gap-8 mt-16">
+
+                    <!-- Testimonial Item 1 -->
+                    <div class="reveal border border-gh-line rounded-2xl p-8 bg-[var(--panel)]">
+                        <div class="flex gap-1 text-gh-gold mb-5">★★★★★</div>
+                        <p class="font-serif text-lg italic text-[var(--text)]/90"
+                            data-i18n="testimonials.reviews.1.quote">
+                            “The tailoring is
+                            impeccable — the kind
+                            of quality I used to fly abroad for. Ghallab Shop brought it home.”</p>
+                        <div class="mt-6 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gh-gold/20 flex items-center justify-center font-display text-gh-gold text-sm"
+                                data-i18n="testimonials.reviews.1.initial">
+                                L</div>
+                            <div>
+                                <p class="text-sm tracking-wide" data-i18n="testimonials.reviews.1.name">Lina Farouk</p>
+                                <p class="text-xs text-[var(--text-dim)]" data-i18n="testimonials.reviews.1.role">
+                                    Verified
+                                    Buyer, Cairo</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Testimonial Item 2 -->
+                    <div class="reveal border border-gh-line rounded-2xl p-8 bg-[var(--panel)]">
+                        <div class="flex gap-1 text-gh-gold mb-5">★★★★★</div>
+                        <p class="font-serif text-lg italic text-[var(--text)]/90"
+                            data-i18n="testimonials.reviews.2.quote">
+                            “From checkout to
+                            delivery, everything
+                            feels considered. It doesn't feel like online shopping — it feels like service.”</p>
+                        <div class="mt-6 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gh-gold/20 flex items-center justify-center font-display text-gh-gold text-sm"
+                                data-i18n="testimonials.reviews.2.initial">
+                                O</div>
+                            <div>
+                                <p class="text-sm tracking-wide" data-i18n="testimonials.reviews.2.name">Omar Al-Sayed
+                                </p>
+                                <p class="text-xs text-[var(--text-dim)]" data-i18n="testimonials.reviews.2.role">
+                                    Verified
+                                    Buyer, Dubai</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Testimonial Item 3 -->
+                    <div class="reveal border border-gh-line rounded-2xl p-8 bg-[var(--panel)]">
+                        <div class="flex gap-1 text-gh-gold mb-5">★★★★★</div>
+                        <p class="font-serif text-lg italic text-[var(--text)]/90"
+                            data-i18n="testimonials.reviews.3.quote">
+                            “From checkout to delivery,
+                            every step feels intentional.
+                            Each detail shows real care,
+                            it's not shopping — it's service.”</p>
+                        <div class="mt-6 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gh-gold/20 flex items-center justify-center font-display text-gh-gold text-sm"
+                                data-i18n="testimonials.reviews.3.initial">
+                                R</div>
+                            <div>
+                                <p class="text-sm tracking-wide" data-i18n="testimonials.reviews.3.name">Rana Khoury</p>
+                                <p class="text-xs text-[var(--text-dim)]" data-i18n="testimonials.reviews.3.role">
+                                    Verified
+                                    Buyer, Amman</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer Section -->
+        <footer class="relative bg-black pt-20 pb-8 px-6">
+            <div class="hairline max-w-7xl mx-auto mb-16"></div>
+
+            <!-- Main Footer Grid -->
+            <div class="max-w-7xl mx-auto grid gap-12 md:grid-cols-5">
+
+                <!-- Brand Info -->
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-3 mb-5">
+                        <i class="ri-flower-fill text-gh-gold text-3xl"></i>
+                        <span class="font-display tracking-[0.22em] text-lg text-gh-cream"
+                            data-i18n="footer.brand_title">GHALLAB SHOP</span>
+                    </div>
+                    <p class="text-sm text-[rgba(247,244,236,0.62)] max-w-sm leading-relaxed"
+                        data-i18n="footer.brand_description">A maison for modern ready-to-wear — sourced from ateliers
+                        we trust, delivered with the care of a house call.</p>
+                    <div class="seal mt-8 mx-0">
+                        <span
+                            class="font-display w-full font-bold text-[11px] tracking-[0.2em] text-gh-gold/80 text-center leading-tight"><i
+                                class="ri-flower-fill text-gh-gold text-2xl"></i><br>2014</span>
+                    </div>
+                </div>
+
+                <!-- Shop Navigation -->
+                <div>
+                    <h4 class="text-xs tracking-[0.25em] text-gh-gold mb-5" data-i18n="footer.shop_heading">SHOP</h4>
+                    <ul class="space-y-3 text-sm text-[var(--text-dim)]">
+                        <li><a href="#" class="hover:text-gh-gold transition-colors text-[rgba(247,244,236,0.62)]"
+                                data-i18n="footer.new_arrivals">New Arrivals</a></li>
+                        <li><a href="#" class="hover:text-gh-gold transition-colors text-[rgba(247,244,236,0.62)]"
+                                data-i18n="footer.womenswear">Womenswear</a>
+                        </li>
+                        <li><a href="#" class="hover:text-gh-gold transition-colors text-[rgba(247,244,236,0.62)]"
+                                data-i18n="footer.menswear">Menswear</a></li>
+                        <li><a href="#" class="hover:text-gh-gold transition-colors text-[rgba(247,244,236,0.62)]"
+                                data-i18n="footer.accessories">Accessories</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Maison Navigation -->
+                <div>
+                    <h4 class="text-xs tracking-[0.25em] text-gh-gold mb-5" data-i18n="footer.maison_heading">MAISON
+                    </h4>
+                    <ul class="space-y-3 text-sm text-[var(--text-dim)]">
+                        <li><a href="#" class="hover:text-gh-gold transition-colors text-[rgba(247,244,236,0.62)]"
+                                data-i18n="footer.about_us">About Us</a></li>
+                        <li><a href="#" class="hover:text-gh-gold transition-colors text-[rgba(247,244,236,0.62)]"
+                                data-i18n="footer.ateliers">Ateliers &amp; Sellers</a></li>
+                        <li><a href="#" class="hover:text-gh-gold transition-colors text-[rgba(247,244,236,0.62)]"
+                                data-i18n="footer.sustainability">Sustainability</a>
+                        </li>
+                        <li><a href="#" class="hover:text-gh-gold transition-colors text-[rgba(247,244,236,0.62)]"
+                                data-i18n="footer.careers">Careers</a></li>
+                    </ul>
+                </div>
+
+                <!-- Client Care & Socials -->
+                <div>
+                    <h4 class="text-xs tracking-[0.25em] text-gh-gold mb-5" data-i18n="footer.client_care_heading">
+                        CLIENT CARE</h4>
+                    <ul class="space-y-3 text-sm text-[var(--text-dim)] mb-6">
+                        <li><a href="#" class="hover:text-gh-gold transition-colors text-[rgba(247,244,236,0.62)]"
+                                data-i18n="footer.shipping_returns">Shipping &amp; Returns</a></li>
+                        <li><a href="#" class="hover:text-gh-gold transition-colors text-[rgba(247,244,236,0.62)]"
+                                data-i18n="footer.size_guide">Size Guide</a></li>
+                        <li><a href="#" class="hover:text-gh-gold transition-colors text-[rgba(247,244,236,0.62)]"
+                                data-i18n="footer.contact">Contact</a></li>
+                    </ul>
+                    <div class="flex gap-3">
+                        <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer"
+                            class="w-9 h-9 rounded-full border border-gh-line flex items-center justify-center hover:border-gh-gold hover:text-gh-gold transition-colors text-xs text-[rgba(247,244,236,0.62)]"><i
+                                class="ri-instagram-fill"></i></a>
+                        <a href="https://twitter.com" rel="noopener noreferrer" target="_blank"
+                            class="w-9 h-9 rounded-full border border-gh-line flex items-center justify-center hover:border-gh-gold hover:text-gh-gold transition-colors text-xs text-[rgba(247,244,236,0.62)]"><i
+                                class="ri-twitter-x-line"></i></a>
+                        <a href="https://www.tiktok.com" rel="noopener noreferrer" target="_blank"
+                            class="w-9 h-9 rounded-full border border-gh-line flex items-center justify-center hover:border-gh-gold hover:text-gh-gold transition-colors text-xs text-[rgba(247,244,236,0.62)]"><i
+                                class="ri-tiktok-fill"></i></a>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="hairline max-w-7xl mx-auto my-10"></div>
+
+            <!-- Copyright and Policies -->
+            <div
+                class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[rgba(247,244,236,0.62)]">
+                <p data-i18n="footer.copyright">© 2026 Ghallab Shop. All rights reserved.</p>
+                <div class="flex gap-6">
+                    <a href="#" class="hover:text-gh-gold transition-colors" data-i18n="footer.privacy_policy">Privacy
+                        Policy</a>
+                    <a href="#" class="hover:text-gh-gold transition-colors" data-i18n="footer.terms_of_service">Terms
+                        of Service</a>
+                </div>
+            </div>
+        </footer>
+
+        <script type="module" src="./js/main.js"></script>
+    </main>
+
+</body>
+
+</html>

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GHALLAB SHOP — المتجر</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500;600&family=Tajawal:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Remix Icon -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+
+    <!-- Google Fonts (Amiri & Cairo) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Cairo:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Compiled Tailwind CSS CLI -->
+    <link rel="stylesheet" href="../css/output.css">
+</head>
+
+<body class="bg-[var(--bg)] text-[var(--text)] antialiased relative">
+
+    <!-- Announcement Ticker -->
+    <div class="marquee-wrap w-full bg-black text-gh-gold border-b border-gh-line overflow-hidden select-none">
+        <div class="marquee-track font-display text-[11px] md:text-xs tracking-[0.2em] py-2.5">
+            <div class="flex items-center gap-10 pl-10">
+                <span>شحن مجاني فوق 300 ريال</span><span class="text-gh-goldlight/50">◆</span>
+                <span>مجموعة أوريليا الجديدة</span><span class="text-gh-goldlight/50">◆</span>
+                <span>إرجاع مجاني خلال 14 يوم</span><span class="text-gh-goldlight/50">◆</span>
+                <span>بائعون موثوقون فقط</span><span class="text-gh-goldlight/50">◆</span>
+                <span>عروض نهاية الموسم</span><span class="text-gh-goldlight/50">◆</span>
+            </div>
+            <div class="flex items-center gap-10 pl-10">
+                <span>شحن مجاني فوق 300 ريال</span><span class="text-gh-goldlight/50">◆</span>
+                <span>مجموعة أوريليا الجديدة</span><span class="text-gh-goldlight/50">◆</span>
+                <span>إرجاع مجاني خلال 14 يوم</span><span class="text-gh-goldlight/50">◆</span>
+                <span>بائعون موثوقون فقط</span><span class="text-gh-goldlight/50">◆</span>
+                <span>عروض نهاية الموسم</span><span class="text-gh-goldlight/50">◆</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 backdrop-blur bg-[var(--bg)]/90 border-b border-gh-line">
+        <div class="max-w-7xl mx-auto px-5 md:px-8 h-20 flex items-center gap-4">
+
+            <!-- Brand -->
+            <h1 class="flex items-center gap-2 shrink-0 group">
+                <i class="ri-flower-fill text-gh-gold text-3xl"></i>
+                <span
+                    class="hidden md:block font-display tracking-[0.18em] text-base text-[var(--text)] group-hover:text-gh-gold transition-colors">GHALLAB</span>
+            </h1>
+
+            <!-- Search (desktop / tablet) -->
+            <div class="hidden md:block flex-1 max-w-xl mx-auto">
+                <div
+                    class="flex items-center gap-2 border border-gh-line rounded-full px-4 h-11 focus-within:border-gh-gold transition-colors">
+                    <i class="ri-search-line text-gh-textdim"></i>
+                    <input id="desktopSearchInput" type="text" placeholder="ابحث عن منتج، ماركة أو فئة..."
+                        class="bg-transparent outline-none w-full text-sm placeholder:text-[var(--text-dim)]">
+                </div>
+            </div>
+
+            <!-- spacer pushes actions to the edge on mobile where search bar is hidden -->
+            <div class="flex-1 md:hidden"></div>
+
+            <!-- Actions -->
+            <div id="headerActions" class="flex items-center gap-2 md:gap-2.5 shrink-0">
+                <button id="btnSearch" class="icon-btn md:hidden" title="بحث">
+                    <i class="ri-search-line text-base"></i>
+                </button>
+                <button id="btnFilter" class="icon-btn md:hidden" title="الفلترة">
+                    <i class="ri-equalizer-line text-base"></i>
+                </button>
+                <button id="btnWishlist" class="icon-btn" title="المفضلة">
+                    <i class="ri-heart-3-line text-base"></i>
+                    <span class="badge" id="wishBadge">0</span>
+                </button>
+                <button id="btnCart" class="icon-btn" title="السلة">
+                    <i class="ri-shopping-bag-3-line text-base"></i>
+                    <span class="badge" id="cartBadge">0</span>
+                </button>
+                <button id="btnSettings" class="icon-btn hidden sm:flex" title="الإعدادات">
+                    <i class="ri-settings-3-line text-base"></i>
+                </button>
+                <button id="themeToggle" class="icon-btn" title="الوضع الليلي / النهاري">
+                    <i id="iconMoon" class="ri-moon-fill text-sm"></i>
+                    <i id="iconSun" class="ri-sun-fill text-sm hidden"></i>
+                </button>
+                <button id="btnAccount" class="icon-btn" title="الحساب">
+                    <img src="https://i.pravatar.cc/80?img=32" class="w-full h-full rounded-full object-cover"
+                        alt="صورة المستخدم">
+                </button>
+            </div>
+        </div>
+
+        <!-- Inline panel: Search (mobile) -->
+        <div class="acc-panel border-t border-gh-line md:hidden" id="panelSearch" data-panel>
+            <div>
+                <div class="max-w-7xl mx-auto px-5 py-4">
+                    <div
+                        class="flex items-center gap-2 border border-gh-line rounded-full px-4 h-11 focus-within:border-gh-gold transition-colors">
+                        <i class="ri-search-line text-gh-textdim"></i>
+                        <input id="mobileSearchInput" type="text" placeholder="ابحث عن منتج، ماركة أو فئة..."
+                            class="bg-transparent outline-none w-full text-sm placeholder:text-[var(--text-dim)]">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inline panel: Wishlist -->
+        <div class="acc-panel border-t border-gh-line" id="panelWishlist" data-panel>
+            <div>
+                <div class="max-w-7xl mx-auto px-5 md:px-8 py-6">
+                    <p class="font-display text-sm tracking-[0.2em] text-gh-gold mb-4">المفضلة</p>
+                    <p class="text-sm text-[var(--text-dim)]">لم تُضِف أي منتج إلى المفضلة بعد — اضغط على أيقونة القلب
+                        داخل أي بطاقة منتج لحفظه هنا.</p>
+                    <div id="wishGrid" class="grid grid-cols-2 md:grid-cols-6 gap-4 mt-5"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inline panel: Cart -->
+        <div class="acc-panel border-t border-gh-line" id="panelCart" data-panel>
+            <div>
+                <div class="max-w-7xl mx-auto px-5 md:px-8 py-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <p class="font-display text-sm tracking-[0.2em] text-gh-gold">سلة المشتريات</p>
+                        <p class="text-xs text-[var(--text-dim)]" id="cartTotalLabel">الإجمالي: 0 ر.س</p>
+                    </div>
+                    <div id="cartItems" class="space-y-3 mb-8">
+                        <p class="text-sm text-[var(--text-dim)]">السلة فارغة — أضف منتجات من القائمة أدناه.</p>
+                    </div>
+                    <div class="hairline mb-6"></div>
+                    <p class="text-xs tracking-[0.25em] text-gh-gold mb-4">قد يعجبك أيضًا</p>
+                    <div id="cartSuggestions" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inline panel: Settings -->
+        <div class="acc-panel border-t border-gh-line" id="panelSettings" data-panel>
+            <div>
+                <div class="max-w-7xl mx-auto px-5 md:px-8 py-7">
+                    <p class="font-display text-sm tracking-[0.2em] text-gh-gold mb-6">الإعدادات</p>
+                    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+                        <div class="settings-card">
+                            <div class="flex items-center gap-2 mb-4">
+                                <i class="ri-translate-2 text-gh-gold"></i>
+                                <p class="text-xs tracking-[0.25em] text-gh-gold">اللغة</p>
+                            </div>
+                            <div class="flex flex-wrap gap-2" data-settings-group>
+                                <span class="pill active">العربية</span><span class="pill">English</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <div class="flex items-center gap-2 mb-4">
+                                <i class="ri-money-dollar-circle-line text-gh-gold"></i>
+                                <p class="text-xs tracking-[0.25em] text-gh-gold">العملة</p>
+                            </div>
+                            <div class="flex flex-wrap gap-2" data-settings-group>
+                                <span class="pill active">ر.س SAR</span><span class="pill">$ USD</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <div class="flex items-center gap-2 mb-4">
+                                <i class="ri-notification-3-line text-gh-gold"></i>
+                                <p class="text-xs tracking-[0.25em] text-gh-gold">الإشعارات</p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-[var(--text-dim)]">تنبيهات العروض والطلبات</span>
+                                <span class="gh-switch on" id="notifSwitch" role="switch" aria-checked="true"
+                                    tabindex="0"></span>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <div class="flex items-center gap-2 mb-4">
+                                <i class="ri-shield-check-line text-gh-gold"></i>
+                                <p class="text-xs tracking-[0.25em] text-gh-gold">الخصوصية</p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-[var(--text-dim)]">مشاركة سجل التصفح للتوصيات</span>
+                                <span class="gh-switch" id="privacySwitch" role="switch" aria-checked="false"
+                                    tabindex="0"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between mt-7">
+                        <p class="text-xs text-[var(--text-dim)]" id="settingsSavedNote">&nbsp;</p>
+                        <button id="btnSaveSettings"
+                            class="btn-gold font-display text-xs tracking-[0.2em] rounded-full px-7 py-2.5">حفظ
+                            التغييرات</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inline panel: Account -->
+        <div class="acc-panel border-t border-gh-line" id="panelAccount" data-panel>
+            <div>
+                <div class="max-w-7xl mx-auto px-5 md:px-8 py-6 flex items-center gap-5">
+                    <img src="https://i.pravatar.cc/120?img=32"
+                        class="w-16 h-16 rounded-full object-cover border border-gh-line" alt="صورة المستخدم">
+                    <div>
+                        <p class="tracking-wide">سارة المطيري</p>
+                        <p class="text-xs text-[var(--text-dim)]">sara.m@example.com</p>
+                    </div>
+                    <div class="flex gap-2 mr-auto">
+                        <span class="pill">طلباتي</span>
+                        <span class="pill">العناوين</span>
+                        <span class="pill">تسجيل الخروج</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Buyer / Seller mode switch -->
+    <div class="max-w-7xl mx-auto px-5 md:px-8 pt-6">
+        <div class="grid grid-cols-2 border border-gh-line rounded-full overflow-hidden">
+            <button id="btnModeBuy" class="mode-btn active font-display text-xs md:text-sm tracking-[0.2em] py-4">
+                <i class="ri-store-2-line ml-1"></i> أشتري
+            </button>
+            <button id="btnModeSell"
+                class="mode-btn font-display text-xs md:text-sm tracking-[0.2em] py-4 border-r border-gh-line">
+                <i class="ri-price-tag-3-line ml-1"></i> أبيع
+            </button>
+        </div>
+    </div>
+
+    <!-- ============ BUYER VIEW ============ -->
+    <section id="viewBuy" class="max-w-7xl mx-auto px-5 md:px-8 py-10 md:py-14">
+        <div class="grid md:grid-cols-[260px_1fr] gap-8">
+
+            <!-- Filter sidebar (inline, no popup) -->
+            <aside id="filterPanel"
+                class="hidden md:block h-fit border border-gh-line rounded-2xl p-6 bg-[var(--panel)] md:sticky md:top-28">
+                <p class="font-display text-xs tracking-[0.25em] text-gh-gold mb-6">الفلترة</p>
+
+                <div class="mb-7">
+                    <p class="text-xs text-[var(--text-dim)] mb-3 tracking-wide">الترتيب حسب</p>
+                    <div class="flex flex-wrap gap-2" id="sortPills">
+                        <span class="pill active" data-sort="pop">الأكثر تقييمًا</span>
+                        <span class="pill" data-sort="new">الأحدث</span>
+                        <span class="pill" data-sort="sales">الأكثر مبيعًا</span>
+                    </div>
+                </div>
+
+                <div class="mb-7">
+                    <p class="text-xs text-[var(--text-dim)] mb-3 tracking-wide">نطاق السعر (ر.س)</p>
+                    <div class="flex items-center gap-2">
+                        <input id="priceMinInput" type="number" placeholder="من" min="0"
+                            class="w-1/2 bg-transparent border border-gh-line rounded-lg px-3 py-2 text-sm outline-none focus:border-gh-gold">
+                        <span class="text-[var(--text-dim)]">—</span>
+                        <input id="priceMaxInput" type="number" placeholder="إلى" min="0"
+                            class="w-1/2 bg-transparent border border-gh-line rounded-lg px-3 py-2 text-sm outline-none focus:border-gh-gold">
+                    </div>
+                    <input id="priceRangeInput" type="range" min="0" max="3000" value="3000" class="w-full mt-3">
+                </div>
+
+                <div class="mb-7">
+                    <p class="text-xs text-[var(--text-dim)] mb-3 tracking-wide">الموديل / الفئة</p>
+                    <div class="flex flex-wrap gap-2" id="categoryPills">
+                        <span class="pill active" data-cat="all">الكل</span>
+                        <span class="pill" data-cat="معاطف">معاطف</span>
+                        <span class="pill" data-cat="فساتين">فساتين</span>
+                        <span class="pill" data-cat="جواكيت">جواكيت</span>
+                        <span class="pill" data-cat="بدلات">بدلات</span>
+                        <span class="pill" data-cat="إكسسوارات">إكسسوارات</span>
+                        <span class="pill" data-cat="أحذية">أحذية</span>
+                        <span class="pill" data-cat="قمصان">قمصان</span>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-xs text-[var(--text-dim)] mb-3 tracking-wide">الكمية المتوفرة</p>
+                    <input id="qtyRangeInput" type="range" min="1" max="20" value="1" class="w-full">
+                    <div class="flex justify-between text-[10px] text-[var(--text-dim)] mt-1">
+                        <span>1</span><span>20+</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Products -->
+            <div>
+                <div class="flex items-end justify-between mb-8">
+                    <div>
+                        <span class="font-serif italic text-gh-gold/80 tracking-[0.3em] text-xs">هذا الموسم</span>
+                        <h2 class="font-display text-2xl md:text-3xl tracking-[0.06em] mt-2">القطع المختارة</h2>
+                    </div>
+                    <p class="text-xs text-[var(--text-dim)]" id="resultsCount">— منتج</p>
+                </div>
+
+                <div id="productGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product card template (cloned via JS) -->
+    <template id="productCardTpl">
+        <div class="reveal product-card border border-gh-line rounded-2xl overflow-hidden bg-[var(--panel)] group">
+            <div class="relative aspect-[4/5] overflow-hidden">
+                <img class="p-img w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    src="" alt="">
+                <div
+                    class="p-desc-overlay absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                    <p class="p-desc text-xs text-white/90 leading-relaxed line-clamp-4"></p>
+                </div>
+                <button class="like-btn absolute top-3 left-3 icon-btn bg-black/40 backdrop-blur border-white/20 z-10">
+                    <i class="ri-heart-3-line text-sm text-white"></i>
+                </button>
+                <span
+                    class="p-discount hidden absolute top-3 right-3 bg-gh-gold text-black text-[10px] font-bold px-2 py-1 rounded-full z-10"></span>
+            </div>
+            <div class="p-5">
+                <div class="flex items-center justify-between mb-1.5">
+                    <h3 class="p-name font-display text-sm tracking-wide"></h3>
+                </div>
+                <div class="flex items-center gap-3 text-xs text-[var(--text-dim)] mb-2">
+                    <span class="flex items-center gap-1"><i class="ri-star-fill text-gh-gold"></i><span
+                            class="p-rating"></span> <span class="p-reviews"></span></span>
+                    <span class="flex items-center gap-1"><i class="ri-shopping-bag-3-line"></i><span
+                            class="p-purchases"></span></span>
+                </div>
+                <p class="text-[11px] text-[var(--text-dim)] mb-4 flex items-center gap-1.5">
+                    <i class="ri-archive-2-line text-gh-gold"></i>
+                    <span>المتبقي: <span class="p-stock font-semibold text-[var(--text)]"></span></span>
+                </p>
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <span class="p-price font-display text-gh-gold text-lg"></span>
+                        <span class="p-oldprice hidden text-xs text-[var(--text-dim)] line-through mr-1"></span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div
+                        class="qty-stepper flex items-center border border-gh-line rounded-full overflow-hidden shrink-0">
+                        <button type="button"
+                            class="qty-dec w-7 h-8 flex items-center justify-center text-gh-textdim hover:text-gh-gold transition-colors">−</button>
+                        <input type="number"
+                            class="qty-input w-8 text-center bg-transparent outline-none text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            value="1" min="1">
+                        <button type="button"
+                            class="qty-inc w-7 h-8 flex items-center justify-center text-gh-textdim hover:text-gh-gold transition-colors">+</button>
+                    </div>
+                    <button
+                        class="add-cart-btn btn-outline-gold flex-1 text-xs tracking-wide border border-gh-gold/60 text-gh-gold rounded-full px-4 py-2 hover:bg-gh-gold hover:text-black transition-colors">
+                        أضف للسلة
+                    </button>
+                </div>
+                <p class="qty-error hidden text-[11px] text-red-400 mt-2"></p>
+            </div>
+        </div>
+    </template>
+
+    <!-- ============ SELLER VIEW ============ -->
+    <section id="viewSell" class="hidden max-w-7xl mx-auto px-5 md:px-8 py-10 md:py-14">
+
+        <!-- Store profile -->
+        <div
+            class="reveal border border-gh-line rounded-2xl p-8 bg-[var(--panel)] flex flex-col md:flex-row items-center gap-8 mb-12">
+            <label
+                class="relative w-28 h-28 rounded-full border border-dashed border-gh-line flex items-center justify-center cursor-pointer shrink-0 hover:border-gh-gold transition-colors overflow-hidden"
+                id="storeImageLabel">
+                <img id="storeImagePreview" class="hidden w-full h-full object-cover" src="" alt="">
+                <span id="storeImagePlaceholder"
+                    class="flex flex-col items-center text-[var(--text-dim)] text-[10px] gap-1">
+                    <i class="ri-store-2-line text-xl"></i> صورة المتجر
+                </span>
+                <input type="file" accept="image/*" class="hidden" id="storeImageInput">
+            </label>
+
+            <div class="flex-1 w-full">
+                <label class="block text-xs tracking-[0.25em] text-gh-gold mb-2">اسم المتجر</label>
+                <input id="storeNameInput" type="text" value="أتيليه لينا"
+                    class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-3 text-lg font-display tracking-wide outline-none focus:border-gh-gold">
+            </div>
+
+            <div class="flex gap-8 shrink-0 text-center">
+                <div>
+                    <p class="font-display text-2xl gold-grad" id="sellerProductCount">4</p>
+                    <p class="text-[10px] tracking-[0.2em] text-[var(--text-dim)] mt-1">منتجات معروضة</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Listed products -->
+        <div class="mb-14">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="font-display text-xl tracking-[0.06em]">منتجاتي المعروضة</h3>
+            </div>
+            <div id="sellerGrid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        </div>
+
+        <!-- Add product -->
+        <div class="reveal border border-gh-line rounded-2xl p-8 bg-[var(--panel)]">
+            <p class="font-display text-sm tracking-[0.2em] text-gh-gold mb-6">إضافة منتج جديد</p>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide">اسم المنتج</label>
+                    <input id="newProductName" type="text" placeholder="مثال: عباءة تطريز يدوي"
+                        class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gh-gold">
+                </div>
+                <label
+                    class="flex items-center gap-3 border border-dashed border-gh-line rounded-lg px-4 py-2.5 cursor-pointer hover:border-gh-gold transition-colors">
+                    <i id="newProductImgIcon" class="ri-image-add-line text-gh-gold"></i>
+                    <span id="newProductImgLabel" class="text-sm text-[var(--text-dim)]">رفع صورة المنتج</span>
+                    <input id="newProductImgInput" type="file" accept="image/*" class="hidden">
+                </label>
+                <div>
+                    <label class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide">السعر (ر.س)</label>
+                    <input id="newProductPrice" type="number" placeholder="0.00" min="0"
+                        class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gh-gold">
+                </div>
+                <div>
+                    <label class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide">الكمية المتوفرة</label>
+                    <input id="newProductQty" type="number" placeholder="0" min="0"
+                        class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gh-gold">
+                </div>
+            </div>
+            <p id="newProductError" class="hidden text-xs text-red-400 mt-4"></p>
+            <button id="btnAddProduct"
+                class="btn-gold mt-7 font-display text-xs tracking-[0.2em] rounded-full px-8 py-3">
+                نشر المنتج
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="relative bg-black pt-16 pb-8 px-6">
+        <div class="hairline max-w-7xl mx-auto mb-12"></div>
+        <div class="max-w-7xl mx-auto grid gap-10 md:grid-cols-4 text-center md:text-right">
+            <div class="md:col-span-2 flex flex-col items-center md:items-start">
+                <div class="flex items-center gap-3 mb-4">
+                    <i class="ri-flower-fill text-gh-gold text-2xl"></i>
+                    <span class="font-display tracking-[0.2em] text-base text-gh-cream">GHALLAB SHOP</span>
+                </div>
+                <p class="text-sm text-[rgba(247,244,236,0.62)] max-w-sm leading-relaxed">
+                    سوق يجمع بائعين موثوقين بمشترين يبحثون عن قطع مختارة بعناية.
+                </p>
+                <div class="seal mt-6"><span
+                        class="font-display text-[10px] tracking-[0.2em] text-gh-gold/80 text-center leading-tight"><i
+                            class="ri-flower-fill text-gh-gold text-lg"></i><br>2014</span></div>
+            </div>
+            <div>
+                <h4 class="text-xs tracking-[0.25em] text-gh-gold mb-4">المتجر</h4>
+                <ul class="space-y-2.5 text-sm text-[rgba(247,244,236,0.62)]">
+                    <li>وصل حديثًا</li>
+                    <li>نساء</li>
+                    <li>رجال</li>
+                    <li>إكسسوارات</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-xs tracking-[0.25em] text-gh-gold mb-4">خدمة العملاء</h4>
+                <ul class="space-y-2.5 text-sm text-[rgba(247,244,236,0.62)]">
+                    <li>الشحن والإرجاع</li>
+                    <li>دليل المقاسات</li>
+                    <li>تواصل معنا</li>
+                </ul>
+            </div>
+        </div>
+        <div class="hairline max-w-7xl mx-auto my-8"></div>
+        <p class="text-center text-xs text-[rgba(247,244,236,0.62)]">© 2026 Ghallab Shop. جميع الحقوق محفوظة.</p>
+    </footer>
+
+    <div
+        style="position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 999999; color: white; padding: 1rem;">
+        <div
+            style="text-align: center; padding: 2rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 1rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); max-width: 600px; width: 100%;">
+
+            <!-- عنوان واحد يتم تعديل نصه عبر JavaScript -->
+            <h1 id="constructionHeading"
+                style="font-size: clamp(1.25rem, 4vw, 2rem); font-weight: bold; margin: 0 0 2rem 0; line-height: 1.4;">
+                <span id="headingText"></span>
+                <span class="myname text-gh-gold"></span>
+            </h1>
+
+            <!-- زر العودة للرئيسية -->
+            <a id="backHomeBtn" data-navigate="index" href="../index.html?action=login"
+                class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-medium cursor-pointer hover:bg-gh-gold">
+                العودة للرئيسية
+            </a>
+        </div>
+    </div>
+
+    <script type="module" src="../js/TheMarket.js"></script>
+
+</body>
+
+</html>
