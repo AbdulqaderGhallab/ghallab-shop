@@ -1,14 +1,17 @@
 {
-  "name": "vs-code",
+  "name": "ghallab-shop",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "js/main.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:css": "tailwindcss -i ./css/input.css -o ./css/output.css --minify",
+    "build:ts": "tsc",
+    "build": "npm run build:css && npm run build:ts",
+    "watch": "tailwindcss -i ./css/input.css -o ./css/output.css --watch"
   },
   "keywords": [],
-  "author": "",
+  "author": "Abdulqader Ghallab",
   "license": "ISC",
   "devDependencies": {
     "autoprefixer": "^10.5.4",
