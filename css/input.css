@@ -11,6 +11,7 @@
   --text-dim: rgba(247, 244, 236, 0.62);
   --line: rgba(201, 162, 74, 0.22);
   --panel: rgba(0, 0, 0, 0.42);
+  --gh-gold: #c9a24a;
 }
 
 html.light {
@@ -20,6 +21,7 @@ html.light {
   --text-dim: rgba(20, 17, 5, 0.62);
   --line: rgba(138, 106, 31, 0.30);
   --panel: rgba(255, 255, 255, 0.55);
+  --gh-gold: #c9a227;
 }
 
 /* ── Base Styles ── */
@@ -34,7 +36,7 @@ body {
   font-family: 'Tajawal', 'Jost', sans-serif;
 }
 
-/* Arabic font override */
+/* Arabic typography override */
 html[lang="ar"] [data-i18n] {
   font-family: 'Cairo', 'Tajawal', sans-serif !important;
 }
@@ -114,7 +116,7 @@ html[lang="ar"] [data-i18n] {
 .reveal {
   opacity: 0;
   transform: translateY(22px);
-  transition: opacity .9s ease, transform .9s ease;
+  transition: opacity .6s ease, transform .6s ease;
 }
 
 .reveal.in {
@@ -142,7 +144,8 @@ html[lang="ar"] [data-i18n] {
 .acc-panel {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows .45s ease;
+  transition: grid-template-rows 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
 .acc-panel.open {
@@ -150,7 +153,12 @@ html[lang="ar"] [data-i18n] {
 }
 
 .acc-panel > div {
+  min-height: 0;
   overflow: hidden;
+}
+
+.acc-panel.hidden {
+  display: none !important;
 }
 
 /* ── Buttons & Interactive Elements ── */
@@ -212,8 +220,9 @@ html[lang="ar"] [data-i18n] {
 }
 
 .mode-btn.active {
-  background: #c9a24a;
-  color: #0a0a0a;
+  background: var(--gh-gold);
+  color: #000000;
+  font-weight: 600;
   box-shadow: 0 1px 1px rgba(255, 255, 255, 0.35) inset, 0 4px 14px rgba(201, 162, 74, 0.28);
 }
 
@@ -222,7 +231,7 @@ html[lang="ar"] [data-i18n] {
 }
 
 .like-btn.liked i:before {
-  content: "\ee0e"; /* ri-heart-fill */
+  content: "\ee0e"; /* RemixIcon: ri-heart-fill */
 }
 
 .pill {
@@ -237,9 +246,14 @@ html[lang="ar"] [data-i18n] {
 
 .pill.active,
 .pill:hover {
-  border-color: #c9a24a;
-  color: #c9a24a;
+  border-color: var(--gh-gold);
+  color: var(--gh-gold);
   background: rgba(201, 162, 74, 0.08);
+}
+
+.pill.active {
+  background-color: var(--gh-gold);
+  color: #000000;
 }
 
 /* ── Call-to-Action Buttons ── */
@@ -305,7 +319,7 @@ html.light .product-card:hover {
   box-shadow: 0 10px 26px -14px rgba(0, 0, 0, 0.4);
 }
 
-/* ── Switches & Inputs ── */
+/* ── Switches & Form Controls ── */
 .gh-switch {
   width: 42px;
   height: 24px;
@@ -326,7 +340,7 @@ html.light .gh-switch {
   content: "";
   position: absolute;
   top: 2px;
-  right: 2px;
+  inset-inline-end: 2px;
   width: 18px;
   height: 18px;
   border-radius: 9999px;
@@ -344,6 +358,10 @@ html.light .gh-switch {
   background: #c9a24a;
 }
 
+[dir="ltr"] .gh-switch.on::after {
+  transform: translateX(18px);
+}
+
 input[type="range"] {
   accent-color: #c9a24a;
 }
@@ -355,22 +373,11 @@ input[type="email"],
   transition: border-color .2s ease, box-shadow .2s ease;
 }
 
-input[type="text"]:focus,
-input[type="number"]:focus,
-input[type="email"]:focus,
-#panelSearch input:focus {
-  box-shadow: 0 0 0 3px rgba(201, 162, 74, 0.12);
-}
-
 .qty-stepper {
   transition: border-color .2s ease;
 }
 
-.qty-stepper:focus-within {
-  border-color: #c9a24a;
-}
-
-/* Remove number input spinners */
+/* Hide number input spinners */
 .qty-input {
   appearance: textfield;
   -moz-appearance: textfield;
@@ -395,12 +402,6 @@ input:disabled {
   cursor: not-allowed;
 }
 
-/* ── Focus & Scrollbar ── */
-:focus-visible {
-  outline: 1.5px solid rgba(201, 162, 74, 0.75);
-  outline-offset: 2px;
-}
-
 button,
 .pill,
 .icon-btn,
@@ -418,7 +419,7 @@ button,
   border-radius: 9999px;
 }
 
-/* ── Media Queries ── */
+/* ── Media Queries & Responsive Adjustments ── */
 @media (max-width: 400px) {
   .icon-btn {
     width: 38px;
@@ -436,7 +437,7 @@ button,
   }
 }
 
-/* Reduced motion */
+/* Accessibility: Reduced motion overrides */
 @media (prefers-reduced-motion: reduce) {
   .marquee-track,
   .seal::before {

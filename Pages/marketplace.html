@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html>
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GHALLAB SHOP — المتجر</title>
+    <title>GHALLAB SHOP — The Store</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,481 +25,805 @@
 
     <!-- Compiled Tailwind CSS CLI -->
     <link rel="stylesheet" href="../css/output.css">
+
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.add('light');
+        }
+    </script>
 </head>
 
 <body class="bg-[var(--bg)] text-[var(--text)] antialiased relative">
 
-    <!-- Announcement Ticker -->
-    <div class="marquee-wrap w-full bg-black text-gh-gold border-b border-gh-line overflow-hidden select-none">
-        <div class="marquee-track font-display text-[11px] md:text-xs tracking-[0.2em] py-2.5">
-            <div class="flex items-center gap-10 pl-10">
-                <span>شحن مجاني فوق 300 ريال</span><span class="text-gh-goldlight/50">◆</span>
-                <span>مجموعة أوريليا الجديدة</span><span class="text-gh-goldlight/50">◆</span>
-                <span>إرجاع مجاني خلال 14 يوم</span><span class="text-gh-goldlight/50">◆</span>
-                <span>بائعون موثوقون فقط</span><span class="text-gh-goldlight/50">◆</span>
-                <span>عروض نهاية الموسم</span><span class="text-gh-goldlight/50">◆</span>
-            </div>
-            <div class="flex items-center gap-10 pl-10">
-                <span>شحن مجاني فوق 300 ريال</span><span class="text-gh-goldlight/50">◆</span>
-                <span>مجموعة أوريليا الجديدة</span><span class="text-gh-goldlight/50">◆</span>
-                <span>إرجاع مجاني خلال 14 يوم</span><span class="text-gh-goldlight/50">◆</span>
-                <span>بائعون موثوقون فقط</span><span class="text-gh-goldlight/50">◆</span>
-                <span>عروض نهاية الموسم</span><span class="text-gh-goldlight/50">◆</span>
-            </div>
-        </div>
-    </div>
+    <!-- Main Application Header -->
+    <header class="sticky top-0 z-40 w-full backdrop-blur bg-[var(--bg)]/90 border-b border-gh-line">
+        <div
+            class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4 md:gap-8">
 
-    <!-- Header -->
-    <header class="sticky top-0 z-40 backdrop-blur bg-[var(--bg)]/90 border-b border-gh-line">
-        <div class="max-w-7xl mx-auto px-5 md:px-8 h-20 flex items-center gap-4">
-
-            <!-- Brand -->
-            <h1 class="flex items-center gap-2 shrink-0 group">
-                <i class="ri-flower-fill text-gh-gold text-3xl"></i>
+            <!-- Brand Logo & Name -->
+            <h1 id="brandLogo" class="flex items-center gap-2 shrink-0 cursor-pointer select-none group">
+                <i id="brandLogoIcon"
+                    class="ri-flower-fill text-gh-gold text-2xl md:text-3xl transition-transform group-hover:scale-105"></i>
                 <span
-                    class="hidden md:block font-display tracking-[0.18em] text-base text-[var(--text)] group-hover:text-gh-gold transition-colors">GHALLAB</span>
+                    class="hidden md:block  font-display tracking-[0.18em] text-base font-semibold group-hover:text-gh-gold text-[var(--text)] transition-colors whitespace-nowrap">
+                    GHALLAB
+                </span>
             </h1>
 
-            <!-- Search (desktop / tablet) -->
-            <div class="hidden md:block flex-1 max-w-xl mx-auto">
+            <!-- Desktop Search Bar -->
+            <div class="hidden md:block flex-1 max-w-2xl mx-4 lg:mx-8">
                 <div
-                    class="flex items-center gap-2 border border-gh-line rounded-full px-4 h-11 focus-within:border-gh-gold transition-colors">
-                    <i class="ri-search-line text-gh-textdim"></i>
-                    <input id="desktopSearchInput" type="text" placeholder="ابحث عن منتج، ماركة أو فئة..."
-                        class="bg-transparent outline-none w-full text-sm placeholder:text-[var(--text-dim)]">
+                    class="w-full flex items-center gap-3 border border-gh-line rounded-full px-4 h-11 focus-within:border-gh-gold transition-all duration-200 bg-transparent">
+                    <i class="ri-search-line text-gh-textdim text-lg shrink-0"></i>
+                    <input id="desktopSearchInput" type="text"
+                        placeholder="Search for products, brands, or categories..."
+                        data-i18n-placeholder="search_placeholder"
+                        class="bg-transparent outline-none w-full text-sm placeholder:text-[var(--text-dim)] text-[var(--text)]">
                 </div>
             </div>
 
-            <!-- spacer pushes actions to the edge on mobile where search bar is hidden -->
+            <!-- Mobile Spacer -->
             <div class="flex-1 md:hidden"></div>
 
-            <!-- Actions -->
-            <div id="headerActions" class="flex items-center gap-2 md:gap-2.5 shrink-0">
-                <button id="btnSearch" class="icon-btn md:hidden" title="بحث">
+            <!-- Header Action Controls -->
+            <div id="headerActions" class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+                <button id="btnSearch" class="icon-btn md:hidden focus-within:border-gh-gold" title="Search"
+                    aria-label="Search">
                     <i class="ri-search-line text-base"></i>
                 </button>
-                <button id="btnFilter" class="icon-btn md:hidden" title="الفلترة">
-                    <i class="ri-equalizer-line text-base"></i>
-                </button>
-                <button id="btnWishlist" class="icon-btn" title="المفضلة">
+                <button id="btnWishlist" class="icon-btn relative focus-within:border-gh-gold" title="Wishlist"
+                    aria-label="Wishlist">
                     <i class="ri-heart-3-line text-base"></i>
                     <span class="badge" id="wishBadge">0</span>
                 </button>
-                <button id="btnCart" class="icon-btn" title="السلة">
+                <button id="btnCart" class="icon-btn relative focus-within:border-gh-gold" title="Shopping Cart"
+                    aria-label="Shopping Cart">
                     <i class="ri-shopping-bag-3-line text-base"></i>
                     <span class="badge" id="cartBadge">0</span>
                 </button>
-                <button id="btnSettings" class="icon-btn hidden sm:flex" title="الإعدادات">
+                <button id="btnSettings" class="icon-btn hidden sm:flex focus-within:border-gh-gold" title="Settings"
+                    aria-label="Settings">
                     <i class="ri-settings-3-line text-base"></i>
                 </button>
-                <button id="themeToggle" class="icon-btn" title="الوضع الليلي / النهاري">
+                <button id="themeToggle" class="icon-btn focus-within:border-gh-gold" title="Toggle Theme"
+                    aria-label="Toggle Theme">
                     <i id="iconMoon" class="ri-moon-fill text-sm"></i>
                     <i id="iconSun" class="ri-sun-fill text-sm hidden"></i>
                 </button>
-                <button id="btnAccount" class="icon-btn" title="الحساب">
-                    <img src="https://i.pravatar.cc/80?img=32" class="w-full h-full rounded-full object-cover"
-                        alt="صورة المستخدم">
+                <button id="btnAccount" class="icon-btn p-0.5 overflow-hidden rounded-full focus-within:border-gh-gold"
+                    title="User Account" aria-label="User Account">
+                    <img id="headerAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=DarkMan"
+                        class="w-full h-full rounded-full object-cover" alt="User Avatar">
                 </button>
             </div>
         </div>
 
-        <!-- Inline panel: Search (mobile) -->
-        <div class="acc-panel border-t border-gh-line md:hidden" id="panelSearch" data-panel>
-            <div>
-                <div class="max-w-7xl mx-auto px-5 py-4">
-                    <div
-                        class="flex items-center gap-2 border border-gh-line rounded-full px-4 h-11 focus-within:border-gh-gold transition-colors">
-                        <i class="ri-search-line text-gh-textdim"></i>
-                        <input id="mobileSearchInput" type="text" placeholder="ابحث عن منتج، ماركة أو فئة..."
-                            class="bg-transparent outline-none w-full text-sm placeholder:text-[var(--text-dim)]">
+        <!-- Panel: Mobile Search -->
+        <div class="acc-panel border-t border-gh-line md:hidden max-h-[calc(100vh-5rem)] overflow-y-auto hidden"
+            id="panelSearch" data-panel>
+            <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 py-4">
+                <div
+                    class="flex items-center gap-2 border border-gh-line rounded-full px-4 h-11 focus-within:border-gh-gold transition-colors">
+                    <i class="ri-search-line text-gh-textdim shrink-0"></i>
+                    <input id="mobileSearchInput" type="text"
+                        placeholder="Search for products, brands, or categories..."
+                        data-i18n-placeholder="search_placeholder"
+                        class="bg-transparent outline-none w-full text-sm placeholder:text-[var(--text-dim)]">
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel: Wishlist -->
+        <div class="acc-panel border-t border-gh-line hidden" id="panelWishlist" data-panel>
+            <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <p class="font-display text-sm tracking-[0.2em] text-gh-gold mb-4" data-i18n="wishlist_title">
+                    Wishlist
+                </p>
+
+                <!-- Empty state message -->
+                <p id="wishlistEmptyMsg" class="text-sm text-[var(--text-dim)] hidden" data-i18n="wishlist_empty">
+                    You haven't added any items to your wishlist yet — click the heart icon on any product card to save
+                    it here.
+                </p>
+
+                <!-- Wishlist Horizontal Scroll Container -->
+                <div id="wishGrid"
+                    class="flex items-center gap-4 mt-5 overflow-x-auto pb-4 scrollbar-thin scroll-smooth">
+                    <!-- Dynamic items will be rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel: Shopping Cart -->
+        <div class="acc-panel border-t border-gh-line max-h-[calc(100vh-5rem)] overflow-y-auto hidden" id="panelCart"
+            data-panel>
+            <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+                <!-- Header & Total -->
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                    <p class="font-display text-sm tracking-[0.2em] text-gh-gold" data-i18n="cart_title">
+                        Shopping Cart
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <p class="text-xs text-[var(--text-dim)]" id="cartTotalLabel" data-i18n="cart_total">
+                            Total: <span id="cartTotalValue">0.00</span> SAR
+                        </p>
+                        <button id="btnPrintInvoice"
+                            class="border-2 border-gh-gold hover:bg-gh-gold hover:text-black font-display text-xs tracking-wide rounded-full px-4 py-1 transition-colors"
+                            data-i18n="btn_print">
+                            Print
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Empty State Message -->
+                <p id="cartEmptyMsg" class="text-sm text-[var(--text-dim)] hidden mb-6" data-i18n="cart_empty">
+                    Your cart is empty — add items from the list below.
+                </p>
+
+                <!-- Vertical Cart Items List Container (Vertical Scroll) -->
+                <div id="cartItemsList" class="space-y-3 mb-8 max-h-96 overflow-y-auto pr-1 scrollbar-thin">
+                    <!-- Dynamic Cart Items Rendered Here -->
+                </div>
+
+                <div class="hairline mb-6 border-b border-gh-line"></div>
+
+                <!-- Product Suggestions (Horizontal Scroll) -->
+                <p class="text-xs tracking-[0.25em] text-gh-gold mb-4" data-i18n="cart_suggestions">
+                    You Might Also Like
+                </p>
+                <div id="cartSuggestions"
+                    class="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-thin scroll-smooth">
+                    <!-- Dynamic Suggested Items Rendered Here -->
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Panel: Settings -->
+        <div class="acc-panel border-t border-gh-line max-h-[calc(100vh-5rem)] overflow-y-auto hidden"
+            id="panelSettings" data-panel>
+            <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7">
+                <p class="font-display text-sm tracking-[0.2em] text-gh-gold mb-6" data-i18n="settings_title">
+                    Settings
+                </p>
+
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Language Choice -->
+                    <div class="settings-card border border-gh-line p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="ri-translate-2 text-gh-gold"></i>
+                            <p class="text-xs tracking-[0.25em] text-gh-gold" data-i18n="setting_language">Language</p>
+                        </div>
+                        <div id="langGroup" class="flex flex-wrap gap-2" data-settings-group>
+                            <span id="btnLangAr" class="pill cursor-pointer">العربية</span>
+                            <span id="btnLangEn" class="pill active cursor-pointer">English</span>
+                        </div>
+                    </div>
+
+                    <!-- Currency Choice -->
+                    <div class="settings-card border border-gh-line p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="ri-money-dollar-circle-line text-gh-gold"></i>
+                            <p class="text-xs tracking-[0.25em] text-gh-gold" data-i18n="setting_currency">Currency</p>
+                        </div>
+                        <div id="currencyGroup" class="flex flex-wrap gap-2" data-settings-group>
+                            <span id="btnCurrSar" class="pill active cursor-pointer">SAR</span>
+                            <span id="btnCurrUsd" class="pill cursor-pointer">USD</span>
+                        </div>
+                    </div>
+
+                    <!-- Clear Order History -->
+                    <div class="settings-card border border-gh-line p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="ri-history-line text-gh-gold"></i>
+                            <p class="text-xs tracking-[0.25em] text-gh-gold" data-i18n="setting_clear_orders">Order
+                                History</p>
+                        </div>
+                        <div>
+                            <button id="btnClearOrders" type="button"
+                                class="w-full border border-gh-gold/40 text-gh-gold hover:bg-gh-gold/10 font-display text-xs tracking-wider rounded-lg px-4 py-2 transition-colors active:scale-95 flex items-center justify-center gap-2"
+                                data-i18n="btn_clear_orders">
+                                <i class="ri-file-reduce-line"></i>
+                                <span>Clear Order History</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Delete Account -->
+                    <div class="settings-card border border-red-500/30 p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="ri-delete-bin-7-line text-red-500"></i>
+                            <p class="text-xs tracking-[0.25em] text-red-500" data-i18n="setting_delete_account">Delete
+                                Account</p>
+                        </div>
+                        <div>
+                            <button id="btnDeleteAccount" type="button"
+                                class="w-full border border-red-500/40 text-red-500 hover:bg-red-500/10 font-display text-xs tracking-wider rounded-lg px-4 py-2 transition-colors active:scale-95 flex items-center justify-center gap-2"
+                                data-i18n="btn_delete_account">
+                                <i class="ri-user-unfollow-line"></i>
+                                <span>Delete Account</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Inline panel: Wishlist -->
-        <div class="acc-panel border-t border-gh-line" id="panelWishlist" data-panel>
-            <div>
-                <div class="max-w-7xl mx-auto px-5 md:px-8 py-6">
-                    <p class="font-display text-sm tracking-[0.2em] text-gh-gold mb-4">المفضلة</p>
-                    <p class="text-sm text-[var(--text-dim)]">لم تُضِف أي منتج إلى المفضلة بعد — اضغط على أيقونة القلب
-                        داخل أي بطاقة منتج لحفظه هنا.</p>
-                    <div id="wishGrid" class="grid grid-cols-2 md:grid-cols-6 gap-4 mt-5"></div>
-                </div>
-            </div>
-        </div>
+        <!-- Panel: Account Profile -->
+        <div class="acc-panel border-t border-gh-line max-h-[calc(100vh-5rem)] overflow-y-auto hidden" id="panelAccount"
+            data-panel>
+            <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
 
-        <!-- Inline panel: Cart -->
-        <div class="acc-panel border-t border-gh-line" id="panelCart" data-panel>
-            <div>
-                <div class="max-w-7xl mx-auto px-5 md:px-8 py-6">
+                <!-- User Profile Summary Header -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-gh-line pb-6">
+                    <div class="flex items-center gap-4 w-full sm:w-auto justify-center sm:justify-start">
+                        <div class="relative w-16 h-16 shrink-0">
+                            <img id="userAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=DarkMan"
+                                class="w-full h-full rounded-full object-cover border border-[var(--border)]"
+                                alt="User Profile Image">
+                            <input type="file" id="avatarInput" accept="image/*" class="hidden">
+                            <label for="avatarInput" id="btnUploadAvatar"
+                                class="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-black/70 border border-gh-gold text-gh-gold flex items-center justify-center cursor-pointer hover:bg-gh-gold hover:text-black transition-all duration-200 shadow-md"
+                                title="Change Avatar">
+                                <i class="ri-edit-line text-xs"></i>
+                            </label>
+                        </div>
+                        <div>
+                            <p id="profileDisplayName" class="font-medium tracking-wide">Abu Al-Tayyib</p>
+                            <p id="profileDisplayEmail" class="text-xs text-[var(--text-dim)]">abualtayyib@example.com
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button id="btnUserOrders" class="pill hover:border-gh-gold transition-colors text-xs px-4 py-2"
+                            data-i18n="btn_my_orders">
+                            My Orders
+                        </button>
+                        <button id="btnLogout"
+                            class="pill hover:border-red-500 hover:text-red-500 transition-colors text-xs px-4 py-2"
+                            data-i18n="btn_logout">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Orders Section Space -->
+                <div id="userOrdersSection" class="mt-1 hidden">
                     <div class="flex items-center justify-between mb-4">
-                        <p class="font-display text-sm tracking-[0.2em] text-gh-gold">سلة المشتريات</p>
-                        <p class="text-xs text-[var(--text-dim)]" id="cartTotalLabel">الإجمالي: 0 ر.س</p>
+                        <div class="flex items-center gap-2">
+                            <i class="ri-shopping-bag-3-line text-gh-gold"></i>
+                            <h3 class="text-sm font-medium tracking-wide text-gh-gold" data-i18n="title_my_orders">My
+                                Orders History</h3>
+                        </div>
+                        <span id="ordersCountBadge"
+                            class="text-xs bg-gh-gold/10 text-gh-gold px-2.5 py-1 rounded-full border border-gh-gold/20">0
+                            Orders</span>
                     </div>
-                    <div id="cartItems" class="space-y-3 mb-8">
-                        <p class="text-sm text-[var(--text-dim)]">السلة فارغة — أضف منتجات من القائمة أدناه.</p>
+
+                    <!-- Dynamic Orders Target Container -->
+                    <div id="userOrdersContainer" class="flex flex-col gap-3 min-h-[120px]">
+                        <!-- Placeholder / Empty State (Will be populated or cleared by TypeScript) -->
+                        <div id="emptyOrdersNotice"
+                            class="flex flex-col items-center justify-center py-8 border border-dashed border-gh-line rounded-lg text-[var(--text-dim)]">
+                            <i class="ri-inbox-archive-line text-3xl mb-2 opacity-50"></i>
+                            <p class="text-xs" data-i18n="msg_no_orders">No orders placed yet.</p>
+                        </div>
                     </div>
-                    <div class="hairline mb-6"></div>
-                    <p class="text-xs tracking-[0.25em] text-gh-gold mb-4">قد يعجبك أيضًا</p>
-                    <div id="cartSuggestions" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Inline panel: Settings -->
-        <div class="acc-panel border-t border-gh-line" id="panelSettings" data-panel>
-            <div>
-                <div class="max-w-7xl mx-auto px-5 md:px-8 py-7">
-                    <p class="font-display text-sm tracking-[0.2em] text-gh-gold mb-6">الإعدادات</p>
-                    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-
-                        <div class="settings-card">
-                            <div class="flex items-center gap-2 mb-4">
-                                <i class="ri-translate-2 text-gh-gold"></i>
-                                <p class="text-xs tracking-[0.25em] text-gh-gold">اللغة</p>
-                            </div>
-                            <div class="flex flex-wrap gap-2" data-settings-group>
-                                <span class="pill active">العربية</span><span class="pill">English</span>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Username Update Card -->
+                    <div class="settings-card border border-gh-line p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="ri-user-3-line text-gh-gold"></i>
+                            <p class="text-xs tracking-[0.25em] text-gh-gold" data-i18n="account_personal_info">Personal
+                                Profile</p>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                            <label for="userNameInput" class="text-sm text-[var(--text-dim)]"
+                                data-i18n="label_username">Username</label>
+                            <div class="flex items-center gap-2">
+                                <input type="text" id="userNameInput" value="Abu Al-Tayyib"
+                                    class="w-full bg-[var(--bg-card)] text-[var(--text)] text-sm px-3 py-2 rounded border border-[var(--border)] focus:outline-none focus:border-gh-gold transition-colors">
+                                <button id="btnSaveUsername"
+                                    class="shrink-0 text-xs px-4 py-2 bg-gh-gold text-black font-semibold rounded hover:bg-opacity-90 transition-opacity"
+                                    data-i18n="btn_save">
+                                    Save
+                                </button>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="settings-card">
-                            <div class="flex items-center gap-2 mb-4">
-                                <i class="ri-money-dollar-circle-line text-gh-gold"></i>
-                                <p class="text-xs tracking-[0.25em] text-gh-gold">العملة</p>
-                            </div>
-                            <div class="flex flex-wrap gap-2" data-settings-group>
-                                <span class="pill active">ر.س SAR</span><span class="pill">$ USD</span>
+                    <!-- Email Update Card -->
+                    <div class="settings-card border border-gh-line p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="ri-mail-line text-gh-gold"></i>
+                            <p class="text-xs tracking-[0.25em] text-gh-gold" data-i18n="account_email">Email Address
+                            </p>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                            <label for="userEmailInput" class="text-sm text-[var(--text-dim)]"
+                                data-i18n="label_email">Email</label>
+                            <div class="flex items-center gap-2">
+                                <input type="email" id="userEmailInput" value="abualtayyib@example.com"
+                                    class="w-full bg-[var(--bg-card)] text-[var(--text)] text-sm px-3 py-2 rounded border border-[var(--border)] focus:outline-none focus:border-gh-gold transition-colors">
+                                <button id="btnSaveEmail"
+                                    class="shrink-0 text-xs px-4 py-2 border border-gh-gold text-gh-gold font-semibold rounded hover:bg-gh-gold hover:text-black transition-all"
+                                    data-i18n="btn_change">
+                                    Change
+                                </button>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="settings-card">
-                            <div class="flex items-center gap-2 mb-4">
-                                <i class="ri-notification-3-line text-gh-gold"></i>
-                                <p class="text-xs tracking-[0.25em] text-gh-gold">الإشعارات</p>
-                            </div>
+                    <!-- Password Update Card -->
+                    <div class="settings-card border border-gh-line p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="ri-lock-password-line text-gh-gold"></i>
+                            <p class="text-xs tracking-[0.25em] text-gh-gold" data-i18n="account_security">Security</p>
+                        </div>
+                        <div class="flex flex-col gap-3">
                             <div class="flex items-center justify-between">
-                                <span class="text-sm text-[var(--text-dim)]">تنبيهات العروض والطلبات</span>
-                                <span class="gh-switch on" id="notifSwitch" role="switch" aria-checked="true"
-                                    tabindex="0"></span>
+                                <span class="text-sm text-[var(--text-dim)]" data-i18n="label_password">Password</span>
+                                <span class="text-xs text-[var(--text-dim)] opacity-70"
+                                    data-i18n="password_last_change">Last changed: 1 month ago</span>
                             </div>
-                        </div>
-
-                        <div class="settings-card">
-                            <div class="flex items-center gap-2 mb-4">
-                                <i class="ri-shield-check-line text-gh-gold"></i>
-                                <p class="text-xs tracking-[0.25em] text-gh-gold">الخصوصية</p>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-[var(--text-dim)]">مشاركة سجل التصفح للتوصيات</span>
-                                <span class="gh-switch" id="privacySwitch" role="switch" aria-checked="false"
-                                    tabindex="0"></span>
+                            <div class="flex items-center gap-2">
+                                <input type="password" id="userPasswordInput" value="••••••••" readonly
+                                    class="w-full bg-[var(--bg-card)] text-[var(--text)] text-sm px-3 py-2 rounded border border-[var(--border)] focus:outline-none">
+                                <button id="btnChangePassword"
+                                    class="shrink-0 text-xs px-4 py-2 border border-gh-gold text-gh-gold font-semibold rounded hover:bg-gh-gold hover:text-black transition-all"
+                                    data-i18n="btn_change">
+                                    Change
+                                </button>
                             </div>
                         </div>
                     </div>
-
-                    <div class="flex items-center justify-between mt-7">
-                        <p class="text-xs text-[var(--text-dim)]" id="settingsSavedNote">&nbsp;</p>
-                        <button id="btnSaveSettings"
-                            class="btn-gold font-display text-xs tracking-[0.2em] rounded-full px-7 py-2.5">حفظ
-                            التغييرات</button>
-                    </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Inline panel: Account -->
-        <div class="acc-panel border-t border-gh-line" id="panelAccount" data-panel>
-            <div>
-                <div class="max-w-7xl mx-auto px-5 md:px-8 py-6 flex items-center gap-5">
-                    <img src="https://i.pravatar.cc/120?img=32"
-                        class="w-16 h-16 rounded-full object-cover border border-gh-line" alt="صورة المستخدم">
-                    <div>
-                        <p class="tracking-wide">سارة المطيري</p>
-                        <p class="text-xs text-[var(--text-dim)]">sara.m@example.com</p>
-                    </div>
-                    <div class="flex gap-2 mr-auto">
-                        <span class="pill">طلباتي</span>
-                        <span class="pill">العناوين</span>
-                        <span class="pill">تسجيل الخروج</span>
-                    </div>
-                </div>
             </div>
         </div>
     </header>
 
-    <!-- Buyer / Seller mode switch -->
+    <!-- Buyer / Seller mode switcher -->
     <div class="max-w-7xl mx-auto px-5 md:px-8 pt-6">
-        <div class="grid grid-cols-2 border border-gh-line rounded-full overflow-hidden">
-            <button id="btnModeBuy" class="mode-btn active font-display text-xs md:text-sm tracking-[0.2em] py-4">
-                <i class="ri-store-2-line ml-1"></i> أشتري
+        <div class="grid grid-cols-2 gap-2 rounded-full overflow-hidden">
+            <button id="btn-mode-buy"
+                class="mode-btn active border border-gh-line rounded-full font-display text-xs md:text-sm tracking-[0.2em] py-4 transition-colors">
+                <i class="ri-store-2-line ml-1"></i>
+                <span data-i18n="mode_buy">BUY</span>
             </button>
-            <button id="btnModeSell"
-                class="mode-btn font-display text-xs md:text-sm tracking-[0.2em] py-4 border-r border-gh-line">
-                <i class="ri-price-tag-3-line ml-1"></i> أبيع
+            <button id="btn-mode-sell"
+                class="mode-btn border border-gh-line font-display text-xs rounded-full md:text-sm tracking-[0.2em] py-4 transition-colors">
+                <i class="ri-price-tag-3-line ml-1"></i>
+                <span data-i18n="mode_sell">SELL</span>
             </button>
         </div>
     </div>
 
     <!-- ============ BUYER VIEW ============ -->
-    <section id="viewBuy" class="max-w-7xl mx-auto px-5 md:px-8 py-10 md:py-14">
-        <div class="grid md:grid-cols-[260px_1fr] gap-8">
+    <section id="view-buy-section" class="max-w-7xl mx-auto px-5 md:px-8 py-8 md:py-14">
+        <!-- Mobile Filter Toggle Button -->
+        <div class="max-w-7xl mx-auto px-5 md:px-8 mt-4 md:hidden">
+            <button id="btn-toggle-filters" type="button"
+                class="w-full border border-gh-line rounded-xl py-2.5 px-4 flex items-center justify-center gap-2 text-xs font-display tracking-wider text-gh-gold bg-[var(--panel)]">
+                <i class="ri-filter-3-line"></i>
+                <span data-i18n="filter_toggle_btn">FILTER OPTIONS</span>
+            </button>
+        </div>
 
-            <!-- Filter sidebar (inline, no popup) -->
-            <aside id="filterPanel"
-                class="hidden md:block h-fit border border-gh-line rounded-2xl p-6 bg-[var(--panel)] md:sticky md:top-28">
-                <p class="font-display text-xs tracking-[0.25em] text-gh-gold mb-6">الفلترة</p>
+        <div class="grid md:grid-cols-[260px_1fr] gap-8 items-start">
 
-                <div class="mb-7">
-                    <p class="text-xs text-[var(--text-dim)] mb-3 tracking-wide">الترتيب حسب</p>
-                    <div class="flex flex-wrap gap-2" id="sortPills">
-                        <span class="pill active" data-sort="pop">الأكثر تقييمًا</span>
-                        <span class="pill" data-sort="new">الأحدث</span>
-                        <span class="pill" data-sort="sales">الأكثر مبيعًا</span>
+            <!-- Sticky Filter Sidebar with custom scrollbar support -->
+            <aside id="filter-panel"
+                class="hidden md:block border border-gh-line rounded-2xl p-6 bg-[var(--panel)] md:sticky md:top-28 max-h-[calc(100vh-8rem)] overflow-y-auto">
+
+                <p class="font-display text-xs tracking-[0.25em] text-gh-gold mb-6" data-i18n="filter_title">FILTERS</p>
+
+                <!-- Sort By -->
+                <div class="mb-7" id="sort-group">
+                    <p class="text-xs text-[var(--text-dim)] mb-3 tracking-wide" data-i18n="sort_label">SORT BY</p>
+                    <div class="flex flex-wrap gap-2" id="sort-pills-container">
+                        <button type="button" class="pill active" data-sort="pop" data-i18n="sort_popular">Top
+                            Rated</button>
+                        <button type="button" class="pill" data-sort="new" data-i18n="sort_newest">Newest</button>
+                        <button type="button" class="pill" data-sort="sales" data-i18n="sort_bestselling">Best
+                            Selling</button>
                     </div>
                 </div>
 
-                <div class="mb-7">
-                    <p class="text-xs text-[var(--text-dim)] mb-3 tracking-wide">نطاق السعر (ر.س)</p>
+                <!-- Price Range -->
+                <div class="mb-7" id="price-range-group">
+                    <p class="text-xs text-[var(--text-dim)] mb-3 tracking-wide" data-i18n="price_range_label">PRICE
+                        RANGE (SAR)</p>
                     <div class="flex items-center gap-2">
-                        <input id="priceMinInput" type="number" placeholder="من" min="0"
+                        <input id="input-price-min" type="number" placeholder="Min" min="0"
+                            data-i18n-placeholder="price_min_placeholder"
                             class="w-1/2 bg-transparent border border-gh-line rounded-lg px-3 py-2 text-sm outline-none focus:border-gh-gold">
                         <span class="text-[var(--text-dim)]">—</span>
-                        <input id="priceMaxInput" type="number" placeholder="إلى" min="0"
+                        <input id="input-price-max" type="number" placeholder="Max" min="0"
+                            data-i18n-placeholder="price_max_placeholder"
                             class="w-1/2 bg-transparent border border-gh-line rounded-lg px-3 py-2 text-sm outline-none focus:border-gh-gold">
                     </div>
-                    <input id="priceRangeInput" type="range" min="0" max="3000" value="3000" class="w-full mt-3">
                 </div>
 
-                <div class="mb-7">
-                    <p class="text-xs text-[var(--text-dim)] mb-3 tracking-wide">الموديل / الفئة</p>
-                    <div class="flex flex-wrap gap-2" id="categoryPills">
-                        <span class="pill active" data-cat="all">الكل</span>
-                        <span class="pill" data-cat="معاطف">معاطف</span>
-                        <span class="pill" data-cat="فساتين">فساتين</span>
-                        <span class="pill" data-cat="جواكيت">جواكيت</span>
-                        <span class="pill" data-cat="بدلات">بدلات</span>
-                        <span class="pill" data-cat="إكسسوارات">إكسسوارات</span>
-                        <span class="pill" data-cat="أحذية">أحذية</span>
-                        <span class="pill" data-cat="قمصان">قمصان</span>
+                <!-- Category Filter -->
+                <div class="mb-7" id="category-group">
+                    <p class="text-xs text-[var(--text-dim)] mb-3 tracking-wide" data-i18n="category_label">CATEGORY /
+                        MODEL</p>
+                    <div class="flex flex-wrap gap-2" id="category-pills-container">
+                        <button type="button" class="pill active" data-cat="all" data-i18n="cat_all">All</button>
+                        <button type="button" class="pill" data-cat="coats" data-i18n="cat_coats">Coats</button>
+                        <button type="button" class="pill" data-cat="dresses" data-i18n="cat_dresses">Dresses</button>
+                        <button type="button" class="pill" data-cat="jackets" data-i18n="cat_jackets">Jackets</button>
+                        <button type="button" class="pill" data-cat="suits" data-i18n="cat_suits">Suits</button>
+                        <button type="button" class="pill" data-cat="accessories"
+                            data-i18n="cat_accessories">Accessories</button>
+                        <button type="button" class="pill" data-cat="shoes" data-i18n="cat_shoes">Shoes</button>
+                        <button type="button" class="pill" data-cat="shirts" data-i18n="cat_shirts">Shirts</button>
                     </div>
                 </div>
 
-                <div>
-                    <p class="text-xs text-[var(--text-dim)] mb-3 tracking-wide">الكمية المتوفرة</p>
-                    <input id="qtyRangeInput" type="range" min="1" max="20" value="1" class="w-full">
-                    <div class="flex justify-between text-[10px] text-[var(--text-dim)] mt-1">
-                        <span>1</span><span>20+</span>
+                <!-- Available Quantity -->
+                <div id="quantity-filter-group">
+                    <p class="text-xs text-[var(--text-dim)] mb-3 tracking-wide" data-i18n="stock_range_label">AVAILABLE
+                        QUANTITY</p>
+                    <input id="input-qty-range" type="range" min="1" max="20" value="1"
+                        class="w-full accent-gh-gold cursor-pointer">
+                    <div class="flex justify-end text-xs text-[var(--text-dim)] mt-1">
+                        <span id="label-qty-val">1</span>
                     </div>
                 </div>
             </aside>
 
-            <!-- Products -->
-            <div>
+            <!-- Product Listing Grid Area -->
+            <main id="main-products-wrapper">
                 <div class="flex items-end justify-between mb-8">
                     <div>
-                        <span class="font-serif italic text-gh-gold/80 tracking-[0.3em] text-xs">هذا الموسم</span>
-                        <h2 class="font-display text-2xl md:text-3xl tracking-[0.06em] mt-2">القطع المختارة</h2>
+                        <span class="font-serif text-gh-gold/80 tracking-[0.3em] text-xs"
+                            data-i18n="section_subtitle">THIS SEASON</span>
+                        <h2 class="font-display text-2xl md:text-3xl tracking-[0.06em] mt-2" data-i18n="section_title">
+                            Curated Selection</h2>
                     </div>
-                    <p class="text-xs text-[var(--text-dim)]" id="resultsCount">— منتج</p>
+                    <p class="text-xs text-[var(--text-dim)]" id="label-results-count">— Items</p>
                 </div>
 
-                <div id="productGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-            </div>
+                <!-- Container where items will be dynamically injected -->
+                <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </main>
+
         </div>
     </section>
 
-    <!-- Product card template (cloned via JS) -->
-    <template id="productCardTpl">
-        <div class="reveal product-card border border-gh-line rounded-2xl overflow-hidden bg-[var(--panel)] group">
-            <div class="relative aspect-[4/5] overflow-hidden">
-                <img class="p-img w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    src="" alt="">
+    <!-- Dynamic Product Card Template -->
+    <template id="product-card-template">
+        <article
+            class="product-card border border-gh-line rounded-2xl overflow-hidden bg-[var(--panel)] group flex flex-col justify-between h-full relative">
+
+            <!-- Image & Badges Container -->
+            <div class="relative aspect-[4/5] overflow-hidden bg-[var(--bg-card)]">
+                <img class="product-image w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    src="" alt="Product Thumbnail" loading="lazy">
+
                 <div
-                    class="p-desc-overlay absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                    <p class="p-desc text-xs text-white/90 leading-relaxed line-clamp-4"></p>
+                    class="product-desc-overlay absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-gradient-to-t from-black/80 via-black/30 to-transparent">
+                    <p class="product-description text-xs text-white/90 leading-relaxed line-clamp-4"></p>
                 </div>
-                <button class="like-btn absolute top-3 left-3 icon-btn bg-black/40 backdrop-blur border-white/20 z-10">
-                    <i class="ri-heart-3-line text-sm text-white"></i>
+
+                <!-- زر المفضلة مع أيقونة Remixicon مفرغة بشكل افتراضي -->
+                <button type="button"
+                    class="btn-wishlist-toggle absolute top-3 left-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur border border-white/20 z-10 transition-all hover:scale-110 active:scale-95"
+                    title="Add to Wishlist" aria-label="Toggle Wishlist">
+                    <i class="wishlist-icon ri-heart-3-line text-sm text-white transition-colors"></i>
                 </button>
+
                 <span
-                    class="p-discount hidden absolute top-3 right-3 bg-gh-gold text-black text-[10px] font-bold px-2 py-1 rounded-full z-10"></span>
+                    class="product-discount badge-discount hidden absolute top-3 right-3 bg-gh-gold text-black text-[10px] font-bold px-2 py-1 rounded-full z-10"></span>
             </div>
-            <div class="p-5">
-                <div class="flex items-center justify-between mb-1.5">
-                    <h3 class="p-name font-display text-sm tracking-wide"></h3>
-                </div>
-                <div class="flex items-center gap-3 text-xs text-[var(--text-dim)] mb-2">
-                    <span class="flex items-center gap-1"><i class="ri-star-fill text-gh-gold"></i><span
-                            class="p-rating"></span> <span class="p-reviews"></span></span>
-                    <span class="flex items-center gap-1"><i class="ri-shopping-bag-3-line"></i><span
-                            class="p-purchases"></span></span>
-                </div>
-                <p class="text-[11px] text-[var(--text-dim)] mb-4 flex items-center gap-1.5">
-                    <i class="ri-archive-2-line text-gh-gold"></i>
-                    <span>المتبقي: <span class="p-stock font-semibold text-[var(--text)]"></span></span>
-                </p>
-                <div class="flex items-center justify-between mb-3">
-                    <div>
-                        <span class="p-price font-display text-gh-gold text-lg"></span>
-                        <span class="p-oldprice hidden text-xs text-[var(--text-dim)] line-through mr-1"></span>
+
+            <!-- Card Content Body -->
+            <div class="p-5 flex flex-col flex-1 justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <h3 class="product-title font-display text-sm tracking-wide text-[var(--text)]"></h3>
+                    </div>
+
+                    <!-- Product Metrics -->
+                    <div class="flex items-center gap-3 text-xs text-[var(--text-dim)] mb-2">
+                        <span class="flex items-center gap-1">
+                            <i class="ri-star-fill text-gh-gold"></i>
+                            <span class="product-rating"></span>
+                            <span class="product-reviews opacity-70"></span>
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i class="ri-shopping-bag-3-line"></i>
+                            <span class="product-purchases"></span>
+                        </span>
+                    </div>
+
+                    <!-- Stock Count -->
+                    <p class="text-[11px] text-[var(--text-dim)] mb-4 flex items-center gap-1.5">
+                        <i class="ri-archive-2-line text-gh-gold"></i>
+                        <span><span data-i18n="stock_label">Stock:</span> <span
+                                class="product-stock font-semibold text-[var(--text)]"></span></span>
+                    </p>
+
+                    <!-- Pricing Details -->
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-baseline gap-2">
+                            <span class="product-price font-display text-gh-gold text-lg"></span>
+                            <span class="product-old-price hidden text-xs text-[var(--text-dim)] line-through"></span>
+                        </div>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <div
-                        class="qty-stepper flex items-center border border-gh-line rounded-full overflow-hidden shrink-0">
+
+                <!-- Card Interactive Footer -->
+                <div>
+                    <div class="flex items-center gap-2">
+                        <div
+                            class="qty-stepper flex items-center border border-gh-line rounded-full overflow-hidden shrink-0">
+                            <button type="button"
+                                class="qty-decrement-btn w-7 h-8 flex items-center justify-center text-[var(--text-dim)] hover:text-gh-gold transition-colors focus:outline-none"
+                                aria-label="Decrease Quantity">−</button>
+                            <input type="number"
+                                class="qty-input w-8 text-center bg-transparent focus:outline-none text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                value="1" min="1">
+                            <button type="button"
+                                class="qty-increment-btn w-7 h-8 flex items-center justify-center text-[var(--text-dim)] hover:text-gh-gold transition-colors focus:outline-none"
+                                aria-label="Increase Quantity">+</button>
+                        </div>
+
                         <button type="button"
-                            class="qty-dec w-7 h-8 flex items-center justify-center text-gh-textdim hover:text-gh-gold transition-colors">−</button>
-                        <input type="number"
-                            class="qty-input w-8 text-center bg-transparent outline-none text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                            value="1" min="1">
-                        <button type="button"
-                            class="qty-inc w-7 h-8 flex items-center justify-center text-gh-textdim hover:text-gh-gold transition-colors">+</button>
+                            class="btn-add-to-cart btn-outline-gold flex-1 text-xs tracking-wide border border-gh-gold/60 text-gh-gold rounded-full px-4 py-2 hover:bg-gh-gold hover:text-black transition-colors focus:outline-none"
+                            data-i18n="btn_add_to_cart">
+                            Add to Cart
+                        </button>
                     </div>
-                    <button
-                        class="add-cart-btn btn-outline-gold flex-1 text-xs tracking-wide border border-gh-gold/60 text-gh-gold rounded-full px-4 py-2 hover:bg-gh-gold hover:text-black transition-colors">
-                        أضف للسلة
-                    </button>
+                    <p class="qty-error-msg hidden text-[11px] text-red-400 mt-2"></p>
                 </div>
-                <p class="qty-error hidden text-[11px] text-red-400 mt-2"></p>
             </div>
-        </div>
+
+        </article>
     </template>
 
-    <!-- ============ SELLER VIEW ============ -->
+    <!--============SELLER VIEW============-->
     <section id="viewSell" class="hidden max-w-7xl mx-auto px-5 md:px-8 py-10 md:py-14">
 
-        <!-- Store profile -->
-        <div
-            class="reveal border border-gh-line rounded-2xl p-8 bg-[var(--panel)] flex flex-col md:flex-row items-center gap-8 mb-12">
-            <label
+        <!-- Store Profile Section -->
+        <div id="sellerStoreProfilePanel"
+            class="border border-gh-line rounded-2xl p-6 md:p-8 bg-[var(--panel)] flex flex-col md:flex-row items-center gap-6 md:gap-8 mb-12">
+
+            <!-- Store Image Upload -->
+            <label id="storeImageLabel"
                 class="relative w-28 h-28 rounded-full border border-dashed border-gh-line flex items-center justify-center cursor-pointer shrink-0 hover:border-gh-gold transition-colors overflow-hidden"
-                id="storeImageLabel">
-                <img id="storeImagePreview" class="hidden w-full h-full object-cover" src="" alt="">
+                for="storeImageInput">
+                <img id="storeImagePreview" class="hidden w-full h-full object-cover" src="" alt="Store Avatar Preview">
                 <span id="storeImagePlaceholder"
-                    class="flex flex-col items-center text-[var(--text-dim)] text-[10px] gap-1">
-                    <i class="ri-store-2-line text-xl"></i> صورة المتجر
+                    class="flex flex-col items-center text-[var(--text-dim)] text-[10px] gap-1 text-center px-2">
+                    <i id="storeImageIcon" class="ri-store-2-line text-xl"></i>
+                    <span data-i18n="seller.store_image">Store Image</span>
                 </span>
                 <input type="file" accept="image/*" class="hidden" id="storeImageInput">
             </label>
 
-            <div class="flex-1 w-full">
-                <label class="block text-xs tracking-[0.25em] text-gh-gold mb-2">اسم المتجر</label>
-                <input id="storeNameInput" type="text" value="أتيليه لينا"
+            <!-- Store Details -->
+            <div id="storeNameContainer" class="flex-1 w-full">
+                <label id="lblStoreName" for="storeNameInput"
+                    class="block text-xs tracking-[0.25em] text-gh-gold mb-2 uppercase" data-i18n="seller.store_name">
+                    Store Name
+                </label>
+                <input id="storeNameInput" type="text" value="Lina Atelier"
                     class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-3 text-lg font-display tracking-wide outline-none focus:border-gh-gold">
             </div>
 
-            <div class="flex gap-8 shrink-0 text-center">
-                <div>
+            <!-- Store Statistics -->
+            <div id="sellerStatsContainer" class="flex gap-8 shrink-0 text-center">
+                <div id="sellerProductStatBox">
                     <p class="font-display text-2xl gold-grad" id="sellerProductCount">4</p>
-                    <p class="text-[10px] tracking-[0.2em] text-[var(--text-dim)] mt-1">منتجات معروضة</p>
+                    <p class="text-[10px] tracking-[0.2em] text-[var(--text-dim)] mt-1 uppercase"
+                        data-i18n="seller.listed_products_count">
+                        Listed Products
+                    </p>
                 </div>
             </div>
         </div>
 
-        <!-- Listed products -->
-        <div class="mb-14">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="font-display text-xl tracking-[0.06em]">منتجاتي المعروضة</h3>
+        <!-- Seller Products Section -->
+        <div id="sellerProductsSection" class="mb-14">
+            <div id="sellerProductsHeader" class="flex items-center justify-between mb-6">
+                <h3 id="sellerProductsTitle" class="font-display text-xl tracking-[0.06em]"
+                    data-i18n="seller.my_listed_products">
+                    My Listed Products
+                </h3>
             </div>
-            <div id="sellerGrid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+
+            <!-- Horizontal scrollable product track with snap alignment -->
+            <div id="sellerGrid"
+                class="flex items-stretch gap-6 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gh-gold/40 scrollbar-track-transparent">
+            </div>
         </div>
 
-        <!-- Add product -->
-        <div class="reveal border border-gh-line rounded-2xl p-8 bg-[var(--panel)]">
-            <p class="font-display text-sm tracking-[0.2em] text-gh-gold mb-6">إضافة منتج جديد</p>
-            <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide">اسم المنتج</label>
-                    <input id="newProductName" type="text" placeholder="مثال: عباءة تطريز يدوي"
+        <!-- Add New Product Form -->
+        <div id="addProductPanel" class="border border-gh-line rounded-2xl p-6 md:p-8 bg-[var(--panel)]">
+            <p id="addProductTitle" class="font-display text-sm tracking-[0.2em] text-gh-gold mb-6 uppercase"
+                data-i18n="seller.add_new_product">
+                Add New Product
+            </p>
+
+            <div id="addProductFormGrid" class="grid md:grid-cols-2 gap-6">
+                <!-- Product Title -->
+                <div id="fieldProductName">
+                    <label id="lblProductName" for="newProductName"
+                        class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide"
+                        data-i18n="seller.product_title">
+                        Product Title
+                    </label>
+                    <input id="newProductName" type="text" placeholder="e.g. Hand-Embroidered Abaya"
+                        data-i18n-placeholder="seller.product_title_placeholder"
                         class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gh-gold">
                 </div>
-                <label
-                    class="flex items-center gap-3 border border-dashed border-gh-line rounded-lg px-4 py-2.5 cursor-pointer hover:border-gh-gold transition-colors">
-                    <i id="newProductImgIcon" class="ri-image-add-line text-gh-gold"></i>
-                    <span id="newProductImgLabel" class="text-sm text-[var(--text-dim)]">رفع صورة المنتج</span>
-                    <input id="newProductImgInput" type="file" accept="image/*" class="hidden">
-                </label>
-                <div>
-                    <label class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide">السعر (ر.س)</label>
-                    <input id="newProductPrice" type="number" placeholder="0.00" min="0"
+
+                <!-- Product Category -->
+                <div id="fieldProductCategory">
+                    <label id="lblProductCategory" for="newProductCategory"
+                        class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide"
+                        data-i18n="seller.product_category">
+                        Category
+                    </label>
+                    <select id="newProductCategory"
+                        class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gh-gold text-[var(--text-main)] [&>option]:bg-[var(--panel)] [&>option]:text-[var(--text-main)] cursor-pointer">
+                        <option value="" disabled selected data-i18n="seller.select_category">Select Category</option>
+                        <option value="dresses">Dresses / فساتين</option>
+                        <option value="trousers">Trousers / سراويل</option>
+                        <option value="blouses">Blouses / بلوزات</option>
+                        <option value="shirts">Shirts / قمصان</option>
+                        <option value="skirts">Skirts / تنانير</option>
+                    </select>
+                </div>
+
+                <!-- Product Image Upload -->
+                <div id="fieldProductImage" class="md:col-span-2">
+                    <label id="lblProductImage" class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide"
+                        data-i18n="seller.product_image">
+                        Product Image
+                    </label>
+
+                    <label id="newProductImgUploadLabel" for="newProductImgInput"
+                        class="relative flex items-center justify-between gap-3 border border-dashed border-gh-line rounded-lg px-4 py-2.5 cursor-pointer hover:border-gh-gold transition-colors overflow-hidden min-h-[46px]">
+
+                        <!-- Placeholder State (Before Upload) -->
+                        <div id="productImgPlaceholder" class="flex items-center gap-3">
+                            <i id="newProductImgIcon" class="ri-image-add-line text-gh-gold text-lg shrink-0"></i>
+                            <span id="newProductImgLabel" class="text-sm text-[var(--text-dim)] truncate"
+                                data-i18n="seller.upload_image">
+                                Upload Image
+                            </span>
+                        </div>
+
+                        <div id="productImgPreviewWrapper" class="hidden gap-3 w-full justify-between">
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                <img id="newProductImgPreview"
+                                    class="w-8 h-8 rounded object-cover border border-gh-line shrink-0" src=""
+                                    alt="Product Preview">
+                                <span id="newProductImgName"
+                                    class="text-xs text-gh-gold font-medium truncate max-w-[180px]"></span>
+                            </div>
+
+                            <button type="button" id="btnRemoveProductImg"
+                                class="text-[var(--text-dim)] hover:text-red-400 transition-colors p-1 shrink-0">
+                                <i class="ri-close-circle-line text-lg"></i>
+                            </button>
+                        </div>
+
+                        <input id="newProductImgInput" type="file" accept="image/png, image/jpeg, image/webp"
+                            class="hidden">
+                    </label>
+                </div>
+
+                <!-- Price -->
+                <div id="fieldProductPrice">
+                    <label id="lblProductPrice" for="newProductPrice"
+                        class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide" data-i18n="seller.price_sar">
+                        Price (SAR)
+                    </label>
+                    <input id="newProductPrice" type="number" placeholder="0.00" min="0" step="0.01"
                         class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gh-gold">
                 </div>
-                <div>
-                    <label class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide">الكمية المتوفرة</label>
+
+                <!-- Discount -->
+                <div id="fieldProductDiscount">
+                    <label id="lblProductDiscount" for="newProductDiscount"
+                        class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide"
+                        data-i18n="seller.discount_percentage">
+                        Discount (%)
+                    </label>
+                    <input id="newProductDiscount" type="number" placeholder="e.g. 5" min="0" max="100"
+                        data-i18n-placeholder="seller.discount_placeholder"
+                        class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gh-gold">
+                </div>
+
+                <!-- Quantity -->
+                <div id="fieldProductQuantity" class="md:col-span-2">
+                    <label id="lblProductQty" for="newProductQty"
+                        class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide"
+                        data-i18n="seller.available_quantity">
+                        Available Quantity
+                    </label>
                     <input id="newProductQty" type="number" placeholder="0" min="0"
                         class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gh-gold">
                 </div>
             </div>
+
+            <!-- Form Error & Submit -->
             <p id="newProductError" class="hidden text-xs text-red-400 mt-4"></p>
             <button id="btnAddProduct"
-                class="btn-gold mt-7 font-display text-xs tracking-[0.2em] rounded-full px-8 py-3">
-                نشر المنتج
+                class="btn-gold mt-7 font-display text-xs tracking-[0.2em] rounded-full px-8 py-3 uppercase"
+                data-i18n="seller.publish_product">
+                Publish Product
             </button>
         </div>
-    </section>
+        <!-- ============ FOOTER ============ -->
+        <footer id="mainFooter" class="relative bg-black pt-16 pb-8 px-6">
+            <div id="footerTopDivider" class="hairline max-w-7xl mx-auto mb-12"></div>
 
-    <!-- Footer -->
-    <footer class="relative bg-black pt-16 pb-8 px-6">
-        <div class="hairline max-w-7xl mx-auto mb-12"></div>
-        <div class="max-w-7xl mx-auto grid gap-10 md:grid-cols-4 text-center md:text-right">
-            <div class="md:col-span-2 flex flex-col items-center md:items-start">
-                <div class="flex items-center gap-3 mb-4">
-                    <i class="ri-flower-fill text-gh-gold text-2xl"></i>
-                    <span class="font-display tracking-[0.2em] text-base text-gh-cream">GHALLAB SHOP</span>
+            <div id="footerGrid" class="max-w-7xl mx-auto grid gap-10 md:grid-cols-4 text-center lg:text-left">
+                <!-- Brand Info -->
+                <div id="footerBrandCol" class="md:col-span-2 flex flex-col items-center lg:items-start">
+                    <div id="footerBrandHeader" class="flex items-center gap-3 mb-4">
+                        <i id="footerBrandLogoIcon" class="ri-flower-fill text-gh-gold text-2xl"></i>
+                        <span id="footerBrandName" class="font-display tracking-[0.2em] text-base text-gh-cream">GHALLAB
+                            SHOP</span>
+                    </div>
+                    <p id="footerBrandDesc" class="text-sm text-[rgba(247,244,236,0.62)] max-w-sm leading-relaxed"
+                        data-i18n="footer.about_text">
+                        A curated marketplace connecting trusted sellers with discerning buyers.
+                    </p>
+                    <div id="footerSeal" class="seal mt-6">
+                        <span id="footerSealText"
+                            class="font-display text-[10px] tracking-[0.2em] text-gh-gold/80 text-center leading-tight">
+                            <i id="footerSealIcon" class="ri-flower-fill text-gh-gold text-lg"></i><br>2014
+                        </span>
+                    </div>
                 </div>
-                <p class="text-sm text-[rgba(247,244,236,0.62)] max-w-sm leading-relaxed">
-                    سوق يجمع بائعين موثوقين بمشترين يبحثون عن قطع مختارة بعناية.
-                </p>
-                <div class="seal mt-6"><span
-                        class="font-display text-[10px] tracking-[0.2em] text-gh-gold/80 text-center leading-tight"><i
-                            class="ri-flower-fill text-gh-gold text-lg"></i><br>2014</span></div>
+
+                <!-- Store Navigation Links -->
+                <div id="footerNavStore">
+                    <h4 id="footerHeaderShop" class="text-xs tracking-[0.25em] text-gh-gold mb-4 uppercase"
+                        data-i18n="footer.shop_header">
+                        Shop
+                    </h4>
+                    <ul id="footerListShop" class="space-y-2.5 text-sm text-[rgba(247,244,236,0.62)]">
+                        <li data-i18n="footer.new_arrivals">New Arrivals</li>
+                        <li data-i18n="footer.women">Women</li>
+                        <li data-i18n="footer.men">Men</li>
+                        <li data-i18n="footer.accessories">Accessories</li>
+                    </ul>
+                </div>
+
+                <!-- Customer Service Links -->
+                <div id="footerNavSupport">
+                    <h4 id="footerHeaderSupport" class="text-xs tracking-[0.25em] text-gh-gold mb-4 uppercase"
+                        data-i18n="footer.support_header">
+                        Customer Care
+                    </h4>
+                    <ul id="footerListSupport" class="space-y-2.5 text-sm text-[rgba(247,244,236,0.62)]">
+                        <li data-i18n="footer.shipping_returns">Shipping & Returns</li>
+                        <li data-i18n="footer.size_guide">Size Guide</li>
+                        <li data-i18n="footer.contact_us">Contact Us</li>
+                    </ul>
+                </div>
             </div>
-            <div>
-                <h4 class="text-xs tracking-[0.25em] text-gh-gold mb-4">المتجر</h4>
-                <ul class="space-y-2.5 text-sm text-[rgba(247,244,236,0.62)]">
-                    <li>وصل حديثًا</li>
-                    <li>نساء</li>
-                    <li>رجال</li>
-                    <li>إكسسوارات</li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="text-xs tracking-[0.25em] text-gh-gold mb-4">خدمة العملاء</h4>
-                <ul class="space-y-2.5 text-sm text-[rgba(247,244,236,0.62)]">
-                    <li>الشحن والإرجاع</li>
-                    <li>دليل المقاسات</li>
-                    <li>تواصل معنا</li>
-                </ul>
-            </div>
-        </div>
-        <div class="hairline max-w-7xl mx-auto my-8"></div>
-        <p class="text-center text-xs text-[rgba(247,244,236,0.62)]">© 2026 Ghallab Shop. جميع الحقوق محفوظة.</p>
-    </footer>
 
-    <div
-        style="position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 999999; color: white; padding: 1rem;">
-        <div
-            style="text-align: center; padding: 2rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 1rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); max-width: 600px; width: 100%;">
+            <div id="footerBottomDivider" class="hairline max-w-7xl mx-auto my-8"></div>
+            <p id="footerCopyright" class="text-center text-xs text-[rgba(247,244,236,0.62)]"
+                data-i18n="footer.copyright">
+                © 2026 Ghallab Shop. All rights reserved.
+            </p>
+        </footer>
 
-            <!-- عنوان واحد يتم تعديل نصه عبر JavaScript -->
-            <h1 id="constructionHeading"
-                style="font-size: clamp(1.25rem, 4vw, 2rem); font-weight: bold; margin: 0 0 2rem 0; line-height: 1.4;">
-                <span id="headingText"></span>
-                <span class="myname text-gh-gold"></span>
-            </h1>
-
-            <!-- زر العودة للرئيسية -->
-            <a id="backHomeBtn" data-navigate="index" href="../index.html?action=login"
-                class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-medium cursor-pointer hover:bg-gh-gold">
-                العودة للرئيسية
-            </a>
-        </div>
-    </div>
-
-    <script type="module" src="../js/TheMarket.js"></script>
-
+        <script type="module" src="../js/TheMarket.js"></script>
 </body>
 
 </html>

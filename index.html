@@ -34,6 +34,12 @@
             emailjs.init("PrbrZsyo2fCxu6YRD");
         })();
     </script>
+
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.add('light');
+        }
+    </script>
 </head>
 
 <body id="body" class="bg-[var(--bg)] text-[var(--text)] antialiased">
