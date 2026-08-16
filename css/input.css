@@ -12,6 +12,9 @@
   --line: rgba(201, 162, 74, 0.22);
   --panel: rgba(0, 0, 0, 0.42);
   --gh-gold: #c9a24a;
+  --bg-surface: #0d0d0d;
+  --bg-card: #101010;
+  --text-main: #f7f4ec;
 }
 
 html.light {
@@ -22,6 +25,9 @@ html.light {
   --line: rgba(138, 106, 31, 0.30);
   --panel: rgba(255, 255, 255, 0.55);
   --gh-gold: #c9a227;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --text-main: #141105;
 }
 
 /* ── Base Styles ── */
@@ -150,11 +156,15 @@ html[lang="ar"] [data-i18n] {
 
 .acc-panel.open {
   grid-template-rows: 1fr;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: auto;
+  overscroll-behavior-y: auto;
 }
 
 .acc-panel > div {
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .acc-panel.hidden {
@@ -292,6 +302,21 @@ html[lang="ar"] [data-i18n] {
   transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
 }
 
+.cart-item {
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.cart-item h4 {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.cart-item .qty-stepper {
+  flex-shrink: 0;
+}
+
 .product-card:hover {
   transform: translateY(-4px);
   border-color: rgba(201, 162, 74, 0.45);
@@ -420,6 +445,44 @@ button,
 }
 
 /* ── Media Queries & Responsive Adjustments ── */
+@media (max-width: 640px) {
+  #panelCart,
+  #panelWishlist,
+  #panelSearch,
+  #panelSettings,
+  #panelAccount {
+    position: static;
+    min-height: 0;
+  }
+
+  .acc-panel[data-panel] {
+    position: static !important;
+    z-index: auto !important;
+  }
+
+  /* على الشاشات القصيرة: اجعل محتوى الإعدادات والملف الشخصي قابلاً للتمرير داخلياً. */
+  #panelSettings,
+  #panelAccount {
+    max-height: calc(100vh - 5rem);
+    max-height: calc(100dvh - 5rem);
+    overflow: hidden;
+    overscroll-behavior: auto;
+    overscroll-behavior-y: auto;
+  }
+
+  #panelSettings > div,
+  #panelAccount > div {
+    max-height: calc(100vh - 5rem);
+    max-height: calc(100dvh - 5rem);
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: auto;
+    overscroll-behavior-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 @media (max-width: 400px) {
   .icon-btn {
     width: 38px;
@@ -434,6 +497,54 @@ button,
     gap: 8px;
     padding-left: 12px;
     padding-right: 12px;
+  }
+}
+
+/* ==========================================================================
+   WISHLIST — HORIZONTAL SCROLL FIX
+   ========================================================================== */
+
+/* حاوية المفضلة لا تسمح بانكماش البطاقات أو اقتطاعها عند ضيق الشاشة. */
+#panelWishlist,
+#panelWishlist > div,
+#wishGrid {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+#panelWishlist {
+  overflow-x: hidden;
+}
+
+#wishGrid {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior: auto;
+  overscroll-behavior-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/* هذه القاعدة تمنع Flexbox من تصغير بطاقة المفضلة. */
+#wishGrid > .wishlist-item {
+  flex: 0 0 11rem;
+  width: 11rem;
+  min-width: 11rem;
+  max-width: 11rem;
+  align-self: stretch;
+}
+
+@media (min-width: 641px) {
+  #wishGrid > .wishlist-item {
+    flex-basis: 13rem;
+    width: 13rem;
+    min-width: 13rem;
+    max-width: 13rem;
   }
 }
 
@@ -455,5 +566,289 @@ button,
   .btn-outline-gold,
   .icon-btn {
     transition: none !important;
+  }
+}
+
+/* ==========================================================================
+   CART & SUGGESTIONS — RESPONSIVE & LAYOUT FIX
+   ========================================================================== */
+
+/* الحاويات الرئيسية: لا تسمح بعرض أدنى مخفي يضغط اللوحة أو يقتطع حدودها. */
+#panelCart,
+#cartItemsList,
+#cartSuggestions,
+#cartSuggestionsTitle {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* اترك max-w-7xl في HTML يحدد عرض محتوى البانل مثل بقية البانلز. */
+#panelCart > div {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+#panelCart,
+#panelCart * {
+  box-sizing: border-box;
+}
+
+#panelCart {
+  overflow-x: hidden;
+}
+
+#panelCart > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* قائمة المنتجات: التمرير رأسي، مع min-height: 0 لمنع Flexbox من ضغط اللوحة. */
+#cartItemsList {
+  display: flex;
+  flex: 1 1 0%;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: auto;
+  overscroll-behavior-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-inline-end: 0.25rem;
+}
+
+/* لا تسمح لـ Flexbox بتصغير بطاقات السلة؛ التمرير يكون داخل القائمة نفسها. */
+#cartItemsList > .cart-item {
+  flex: 0 0 auto;
+  height: auto;
+  min-height: fit-content;
+}
+
+/* المقترحات: شريط أفقي مستقل لا يجعل بطاقات السلة تنكمش. */
+#cartSuggestionsTitle {
+  flex: 0 0 auto;
+}
+
+#cartSuggestions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 0.5rem;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior: auto;
+  padding: 0.1rem 0.25rem 0.5rem 0.1rem;
+  scroll-padding-inline: 0.1rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* بطاقة السلة الأساسية */
+.cart-item {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  align-self: stretch;
+  box-sizing: border-box;
+  overflow: hidden;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--line);
+}
+
+/* تخطيط ثابت لصف الصورة والمعلومات: عمود مرن للنص يمنع الانكماش غير المتناسب. */
+.cart-item:not(.suggestion-item) > div:first-child {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  min-width: 0;
+}
+
+.cart-item:not(.suggestion-item) > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.cart-item > div {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cart-item h4 {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  line-height: 1.35;
+  white-space: normal !important;
+  overflow: visible !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-overflow: clip !important;
+}
+
+.cart-item img {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.cart-item .qty-stepper,
+.cart-item [data-action="remove"],
+.cart-item [data-action="add-to-cart"] {
+  flex-shrink: 0;
+}
+
+.cart-item .qty-stepper {
+  max-width: 100%;
+}
+
+/* بطاقات المقترحات ثابتة العرض؛ لذلك تتحرك أفقياً بدلاً من الانضغاط. */
+.cart-item.suggestion-item,
+#cartSuggestions > .suggestion-item {
+  flex: 0 0 160px;
+  width: 160px;
+  min-width: 160px;
+  max-width: 160px;
+  margin: 0;
+  scroll-snap-align: start;
+}
+
+.suggestion-item > div:first-child {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+.suggestion-item h4 {
+  text-align: center;
+}
+
+.suggestion-item .btn-add-to-cart-suggestion {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 641px) {
+  .cart-item.suggestion-item,
+  #cartSuggestions > .suggestion-item {
+    flex-basis: 180px;
+    width: 180px;
+    min-width: 180px;
+    max-width: 180px;
+  }
+}
+
+@media (max-width: 640px) {
+  #panelCart {
+    max-width: 100vw;
+    max-height: calc(100vh - 5rem);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: auto;
+    overscroll-behavior-y: auto;
+  }
+
+  #panelCart > div {
+    padding-inline: 0.75rem;
+  }
+
+  #cartItemsList {
+    max-height: calc(100vh - 260px);
+    min-height: 0;
+    padding-inline-end: 0.25rem;
+    overscroll-behavior: auto;
+    overscroll-behavior-y: auto;
+  }
+
+  #cartSuggestions {
+    gap: 0.5rem;
+  }
+
+  .cart-item {
+    padding: 0.65rem;
+  }
+
+  .cart-item > div:first-child {
+    gap: 0.5rem;
+  }
+
+  .cart-item img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .qty-input {
+    width: 22px;
+    padding-inline: 1px;
+    font-size: 11px;
+  }
+
+  .qty-stepper button {
+    width: 22px;
+    height: 22px;
+  }
+
+  .cart-item .qty-stepper {
+    gap: 1px;
+  }
+
+  .cart-item h4 {
+    font-size: 0.75rem;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 400px) {
+  #panelCart > div {
+    padding-inline: 0.625rem;
+  }
+
+  .cart-item {
+    padding: 0.55rem;
+  }
+
+  .cart-item:not(.suggestion-item) > div:first-child {
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 0.4rem;
+  }
+
+  .cart-item img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .cart-item .qty-stepper {
+    gap: 0;
+  }
+
+  .cart-item .qty-stepper button {
+    width: 20px;
+    height: 20px;
+  }
+
+  .qty-input {
+    width: 20px;
   }
 }

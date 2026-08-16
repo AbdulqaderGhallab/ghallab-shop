@@ -114,7 +114,8 @@
         </div>
 
         <!-- Panel: Wishlist -->
-        <div class="acc-panel border-t border-gh-line hidden" id="panelWishlist" data-panel>
+        <div class="acc-panel border-t border-gh-line max-h-[calc(100vh-5rem)] overflow-y-auto hidden"
+            id="panelWishlist" data-panel>
             <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <p class="font-display text-sm tracking-[0.2em] text-gh-gold mb-4" data-i18n="wishlist_title">
                     Wishlist
@@ -137,21 +138,26 @@
         <!-- Panel: Shopping Cart -->
         <div class="acc-panel border-t border-gh-line max-h-[calc(100vh-5rem)] overflow-y-auto hidden" id="panelCart"
             data-panel>
-            <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col h-full box-border">
 
-                <!-- Header & Total -->
-                <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-                    <p class="font-display text-sm tracking-[0.2em] text-gh-gold" data-i18n="cart_title">
+                <!-- Header & Total & Action Buttons -->
+                <div
+                    class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2 mb-4 shrink-0">
+                    <p class="font-display text-xs sm:text-sm tracking-[0.15em] sm:tracking-[0.2em] text-gh-gold"
+                        data-i18n="cart_title">
                         Shopping Cart
                     </p>
-                    <div class="flex items-center gap-4">
-                        <p class="text-xs text-[var(--text-dim)]" id="cartTotalLabel" data-i18n="cart_total">
-                            Total: <span id="cartTotalValue">0.00</span> SAR
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                        <p class="text-[11px] sm:text-xs text-[var(--text-dim)] whitespace-nowrap" id="cartTotalLabel"
+                            data-i18n="cart_total">
+                            Total: <span id="cartTotalValue" class="font-semibold text-[var(--text-main)]">0.00</span>
+                            SAR
                         </p>
+                        <!-- Issue 2: Consolidated Print & Buy Button -->
                         <button id="btnPrintInvoice"
-                            class="border-2 border-gh-gold hover:bg-gh-gold hover:text-black font-display text-xs tracking-wide rounded-full px-4 py-1 transition-colors"
+                            class="btn-gold font-display text-[10px] sm:text-xs tracking-wide rounded-full px-3 sm:px-5 py-1.5 sm:py-2 transition-all whitespace-nowrap w-full sm:w-auto"
                             data-i18n="btn_print">
-                            Print
+                            <i class="ri-printer-line mr-1"></i>Print & Buy
                         </button>
                     </div>
                 </div>
@@ -161,19 +167,23 @@
                     Your cart is empty — add items from the list below.
                 </p>
 
-                <!-- Vertical Cart Items List Container (Vertical Scroll) -->
-                <div id="cartItemsList" class="space-y-3 mb-8 max-h-96 overflow-y-auto pr-1 scrollbar-thin">
+                <!-- Vertical Cart Items List Container - Issue 3: Fixed responsive layout -->
+                <div id="cartItemsList"
+                    class="space-y-2 sm:space-y-3 mb-4 flex-1 overflow-y-auto pr-2 scrollbar-thin w-full max-w-full box-border">
                     <!-- Dynamic Cart Items Rendered Here -->
                 </div>
 
-                <div class="hairline mb-6 border-b border-gh-line"></div>
+                <!-- Product Suggestions Section -->
+                <div id="cartSuggestionsTitle" class="hidden">
+                    <div class="hairline my-4 border-b border-gh-line/50"></div>
+                    <p class="text-xs tracking-[0.2em] text-gh-gold mb-3" data-i18n="cart_suggestions">
+                        You Might Also Like
+                    </p>
+                </div>
 
-                <!-- Product Suggestions (Horizontal Scroll) -->
-                <p class="text-xs tracking-[0.25em] text-gh-gold mb-4" data-i18n="cart_suggestions">
-                    You Might Also Like
-                </p>
+                <!-- Product Suggestions (Horizontal Scroll) - Issue 3: Improved overflow handling -->
                 <div id="cartSuggestions"
-                    class="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-thin scroll-smooth">
+                    class="flex flex-nowrap items-start gap-2 sm:gap-3 overflow-x-auto overflow-y-hidden pb-2 scrollbar-thin scroll-smooth snap-x snap-mandatory w-full max-w-full shrink-0 box-border">
                     <!-- Dynamic Suggested Items Rendered Here -->
                 </div>
 
@@ -303,16 +313,20 @@
                     </div>
 
                     <!-- Dynamic Orders Target Container -->
-                    <div id="userOrdersContainer" class="flex flex-col gap-3 min-h-[120px]">
-                        <!-- Placeholder / Empty State (Will be populated or cleared by TypeScript) -->
+                    <div id="userOrdersContainer" class="flex flex-col gap-2.5 min-h-[120px]">
+                        <!-- Placeholder / Empty State -->
                         <div id="emptyOrdersNotice"
-                            class="flex flex-col items-center justify-center py-8 border border-dashed border-gh-line rounded-lg text-[var(--text-dim)]">
-                            <i class="ri-inbox-archive-line text-3xl mb-2 opacity-50"></i>
-                            <p class="text-xs" data-i18n="msg_no_orders">No orders placed yet.</p>
+                            class="flex flex-col items-center justify-center py-8 border border-dashed border-gh-line/60 rounded-xl text-[var(--text-dim)] bg-[var(--bg-card)]/30">
+                            <div>
+                                <i class="ri-inbox-archive-line text-3xl mb-2 opacity-40 text-gh-gold"></i>
+                                <p class="text-xs font-normal" data-i18n="msg_no_orders">No orders placed yet.</p>
+                            </div>
+                            <div>
+                                Put it Here
+                            </div>
                         </div>
                     </div>
                 </div>
-
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- Username Update Card -->
                     <div class="settings-card border border-gh-line p-4 rounded-lg">
@@ -516,7 +530,7 @@
                 <button type="button"
                     class="btn-wishlist-toggle absolute top-3 left-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur border border-white/20 z-10 transition-all hover:scale-110 active:scale-95"
                     title="Add to Wishlist" aria-label="Toggle Wishlist">
-                    <i class="wishlist-icon ri-heart-3-line text-sm text-white transition-colors"></i>
+                    <i class="wishlist-icon ri-poker-hearts-line text-sm text-white transition-colors"></i>
                 </button>
 
                 <span
@@ -764,66 +778,67 @@
                 Publish Product
             </button>
         </div>
-        <!-- ============ FOOTER ============ -->
-        <footer id="mainFooter" class="relative bg-black pt-16 pb-8 px-6">
-            <div id="footerTopDivider" class="hairline max-w-7xl mx-auto mb-12"></div>
+    </section>
+    <!-- ============ FOOTER ============ -->
+    <footer id="mainFooter" class="relative bg-black pt-16 pb-8 px-6">
+        <div id="footerTopDivider" class="hairline max-w-7xl mx-auto mb-12"></div>
 
-            <div id="footerGrid" class="max-w-7xl mx-auto grid gap-10 md:grid-cols-4 text-center lg:text-left">
-                <!-- Brand Info -->
-                <div id="footerBrandCol" class="md:col-span-2 flex flex-col items-center lg:items-start">
-                    <div id="footerBrandHeader" class="flex items-center gap-3 mb-4">
-                        <i id="footerBrandLogoIcon" class="ri-flower-fill text-gh-gold text-2xl"></i>
-                        <span id="footerBrandName" class="font-display tracking-[0.2em] text-base text-gh-cream">GHALLAB
-                            SHOP</span>
-                    </div>
-                    <p id="footerBrandDesc" class="text-sm text-[rgba(247,244,236,0.62)] max-w-sm leading-relaxed"
-                        data-i18n="footer.about_text">
-                        A curated marketplace connecting trusted sellers with discerning buyers.
-                    </p>
-                    <div id="footerSeal" class="seal mt-6">
-                        <span id="footerSealText"
-                            class="font-display text-[10px] tracking-[0.2em] text-gh-gold/80 text-center leading-tight">
-                            <i id="footerSealIcon" class="ri-flower-fill text-gh-gold text-lg"></i><br>2014
-                        </span>
-                    </div>
+        <div id="footerGrid" class="max-w-7xl mx-auto grid gap-10 md:grid-cols-4 text-center lg:text-left">
+            <!-- Brand Info -->
+            <div id="footerBrandCol" class="md:col-span-2 flex flex-col items-center lg:items-start">
+                <div id="footerBrandHeader" class="flex items-center gap-3 mb-4">
+                    <i id="footerBrandLogoIcon" class="ri-flower-fill text-gh-gold text-2xl"></i>
+                    <span id="footerBrandName" class="font-display tracking-[0.2em] text-base text-gh-cream">GHALLAB
+                        SHOP</span>
                 </div>
-
-                <!-- Store Navigation Links -->
-                <div id="footerNavStore">
-                    <h4 id="footerHeaderShop" class="text-xs tracking-[0.25em] text-gh-gold mb-4 uppercase"
-                        data-i18n="footer.shop_header">
-                        Shop
-                    </h4>
-                    <ul id="footerListShop" class="space-y-2.5 text-sm text-[rgba(247,244,236,0.62)]">
-                        <li data-i18n="footer.new_arrivals">New Arrivals</li>
-                        <li data-i18n="footer.women">Women</li>
-                        <li data-i18n="footer.men">Men</li>
-                        <li data-i18n="footer.accessories">Accessories</li>
-                    </ul>
-                </div>
-
-                <!-- Customer Service Links -->
-                <div id="footerNavSupport">
-                    <h4 id="footerHeaderSupport" class="text-xs tracking-[0.25em] text-gh-gold mb-4 uppercase"
-                        data-i18n="footer.support_header">
-                        Customer Care
-                    </h4>
-                    <ul id="footerListSupport" class="space-y-2.5 text-sm text-[rgba(247,244,236,0.62)]">
-                        <li data-i18n="footer.shipping_returns">Shipping & Returns</li>
-                        <li data-i18n="footer.size_guide">Size Guide</li>
-                        <li data-i18n="footer.contact_us">Contact Us</li>
-                    </ul>
+                <p id="footerBrandDesc" class="text-sm text-[rgba(247,244,236,0.62)] max-w-sm leading-relaxed"
+                    data-i18n="footer.about_text">
+                    A curated marketplace connecting trusted sellers with discerning buyers.
+                </p>
+                <div id="footerSeal" class="seal mt-6">
+                    <span id="footerSealText"
+                        class="font-display text-[10px] tracking-[0.2em] text-gh-gold/80 text-center leading-tight">
+                        <i id="footerSealIcon" class="ri-flower-fill text-gh-gold text-lg"></i><br>2014
+                    </span>
                 </div>
             </div>
 
-            <div id="footerBottomDivider" class="hairline max-w-7xl mx-auto my-8"></div>
-            <p id="footerCopyright" class="text-center text-xs text-[rgba(247,244,236,0.62)]"
-                data-i18n="footer.copyright">
-                © 2026 Ghallab Shop. All rights reserved.
-            </p>
-        </footer>
+            <!-- Store Navigation Links -->
+            <div id="footerNavStore">
+                <h4 id="footerHeaderShop" class="text-xs tracking-[0.25em] text-gh-gold mb-4 uppercase"
+                    data-i18n="footer.shop_header">
+                    Shop
+                </h4>
+                <ul id="footerListShop" class="space-y-2.5 text-sm text-[rgba(247,244,236,0.62)]">
+                    <li data-i18n="footer.new_arrivals">New Arrivals</li>
+                    <li data-i18n="footer.women">Women</li>
+                    <li data-i18n="footer.men">Men</li>
+                    <li data-i18n="footer.accessories">Accessories</li>
+                </ul>
+            </div>
 
-        <script type="module" src="../js/TheMarket.js"></script>
+            <!-- Customer Service Links -->
+            <div id="footerNavSupport">
+                <h4 id="footerHeaderSupport" class="text-xs tracking-[0.25em] text-gh-gold mb-4 uppercase"
+                    data-i18n="footer.support_header">
+                    Customer Care
+                </h4>
+                <ul id="footerListSupport" class="space-y-2.5 text-sm text-[rgba(247,244,236,0.62)]">
+                    <li data-i18n="footer.shipping_returns">Shipping & Returns</li>
+                    <li data-i18n="footer.size_guide">Size Guide</li>
+                    <li data-i18n="footer.contact_us">Contact Us</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="footerBottomDivider" class="hairline max-w-7xl mx-auto my-8"></div>
+        <p id="footerCopyright" class="text-center text-xs text-[rgba(247,244,236,0.62)]" data-i18n="footer.copyright">
+            © 2026 Ghallab Shop. All rights reserved.
+        </p>
+    </footer>
+
+    <script type="module" src="../js/TheMarket.js"></script>
+    <script type="module" src="../js/setting.js"></script>
 </body>
 
 </html>

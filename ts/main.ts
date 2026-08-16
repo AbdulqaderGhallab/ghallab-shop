@@ -628,18 +628,22 @@ window.addEventListener("storage", (e: StorageEvent) => {
 
 // Initial verification status check on runtime startup
 const savedEmailVerified = localStorage.getItem("emailVerified") === "true";
-const hasTokenLink = localStorage.getItem("tokenlink") !== null;
 const verifiedFor = localStorage.getItem("verifiedEmailAddress");
-const currentEmailValue = emailInput?.value.trim().toLowerCase();
+let currentEmailValue = emailInput?.value.trim().toLowerCase() ?? "";
 
-if (savedEmailVerified && hasTokenLink && verifiedFor === currentEmailValue) {
-    showVerifiedUI();
+if (savedEmailVerified && verifiedFor) {
+    if (emailInput && !currentEmailValue) {
+        emailInput.value = verifiedFor;
+        currentEmailValue = verifiedFor;
+    }
+
+    if (verifiedFor === currentEmailValue) {
+        showVerifiedUI();
+    } else {
+        truecheck?.classList.add("hidden");
+    }
 } else {
     truecheck?.classList.add("hidden");
-    if (savedEmailVerified && (!hasTokenLink || verifiedFor !== currentEmailValue)) {
-        localStorage.removeItem("emailVerified");
-        localStorage.removeItem("verifiedEmailAddress");
-    }
 }
 
 // Action handler for auto-opening modal via URL search parameters
