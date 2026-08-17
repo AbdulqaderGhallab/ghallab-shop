@@ -1,4 +1,4 @@
-﻿// ==========================================
+// ==========================================
 // INTERFACES & TYPES
 // ==========================================
 interface WishlistItem {
@@ -766,6 +766,7 @@ function printOrder(orderId: string): void {
 
     document.querySelector('.market-print-invoice')?.remove();
     document.getElementById('market-print-style')?.remove();
+    document.documentElement.classList.remove('printing-market-order');
     document.body.classList.remove('printing-market-order');
 
     const rows = order.products.map(product => `
@@ -783,9 +784,11 @@ function printOrder(orderId: string): void {
     printStyle.textContent = `
         @media screen { .market-print-invoice { display: none !important; } }
         @media print {
-            body.printing-market-order > *:not(.market-print-invoice) { display: none !important; }
-            body.printing-market-order { margin: 0 !important; padding: 0 !important; background: #fff !important; }
-            body.printing-market-order .market-print-invoice { display: block !important; }
+            html.printing-market-order body * { visibility: hidden !important; }
+            html.printing-market-order body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+            html.printing-market-order .market-print-invoice,
+            html.printing-market-order .market-print-invoice * { visibility: visible !important; }
+            html.printing-market-order .market-print-invoice { position: absolute !important; left: 0 !important; top: 0 !important; display: block !important; }
             .market-print-invoice, .market-print-invoice * { box-sizing: border-box; }
             .market-print-invoice { display: block; width: 100%; max-width: 760px; margin: 0 auto; padding: 28px; background: #fff; color: #171717; font-family: Arial, Helvetica, sans-serif; }
             .market-print-invoice .brand { border-bottom: 2px solid #caa84e; padding-bottom: 18px; margin-bottom: 22px; }
@@ -818,13 +821,15 @@ function printOrder(orderId: string): void {
 
     document.head.appendChild(printStyle);
     document.body.appendChild(printInvoice);
+    document.documentElement.classList.add('printing-market-order');
     document.body.classList.add('printing-market-order');
 
     let cleaned = false;
     const cleanup = (): void => {
         if (cleaned) return;
         cleaned = true;
-        document.body.classList.remove('printing-market-order');
+        document.documentElement.classList.remove('printing-market-order');
+    document.body.classList.remove('printing-market-order');
         printInvoice.remove();
         printStyle.remove();
         window.removeEventListener('afterprint', cleanup);
