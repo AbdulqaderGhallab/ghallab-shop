@@ -1,1511 +1,844 @@
-// ==========================================
-// INTERFACES & TYPES
-// ==========================================
-interface WishlistItem {
-    id: string | number;
-    title: string;
-    price: number | string;
-    originalPrice?: number | undefined;
-    discount?: string | undefined;
-    img: string;
-}
+<!DOCTYPE html>
+<html>
 
-interface Product {
-    id: string | number;
-    nameAr: string;
-    nameEn?: string;
-    price: number;
-    oldPrice?: number;
-    discount?: string;
-    rating: string;
-    reviewsCount: number;
-    purchasesCount: number;
-    stock: number;
-    image: string;
-    descriptionAr: string;
-    categoryEn: string;
-}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GHALLAB SHOP — The Store</title>
 
-interface CartItem {
-    id: string | number;
-    title?: string | undefined;
-    price: number | string;
-    img?: string | undefined;
-    quantity?: number;
-    nameAr?: string | undefined;
-    nameEn?: string | undefined;
-    categoryEn?: string | undefined;
-    rating?: string | undefined;
-    discount?: string | undefined;
-    originalPrice?: number | undefined;
-    stock?: number;
-}
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500;600&family=Tajawal:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
 
-interface SuggestionItem {
-    id: string | number;
-    title?: string | undefined;
-    price: number | string;
-    img?: string | undefined;
-    quantity?: number;
-    nameAr?: string | undefined;
-    nameEn?: string | undefined;
-    categoryEn?: string | undefined;
-    rating?: string | undefined;
-    discount?: string | undefined;
-    originalPrice?: number | undefined;
-}
+    <!-- Remix Icon -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
 
-interface OrderProductSnapshot {
-    id: string | number;
-    title: string;
-    image?: string;
-    quantity: number;
-    unitPrice: number;
-    itemTotalPrice: number;
-}
+    <!-- Google Fonts (Amiri & Cairo) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Cairo:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
 
-interface OrderRecord {
-    id: string;
-    orderNumber: number;
-    currency: string;
-    totalQuantity: number;
-    totalPrice: number;
-    time: string;
-    createdAt: number;
-    products: OrderProductSnapshot[];
-}
+    <!-- Compiled Tailwind CSS CLI -->
+    <link rel="stylesheet" href="../css/output.css">
 
-interface ProductStats {
-    stock: number;
-    purchasesCount: number;
-    baseRating: number;
-    baseReviewsCount: number;
-    ratingsByAccount: Record<string, number>;
-}
-
-// ==========================================
-// HELPER FUNCTIONS
-// ==========================================
-function calculateDiscountedPrice(price: number, discount?: string): number {
-    if (!discount) return price;
-    const normalized = discount.replace(/[%\s]/g, '');
-    const numeric = Math.abs(Number(normalized));
-    if (Number.isNaN(numeric) || numeric <= 0) return price;
-    return Number((price - (price * numeric) / 100).toFixed(2));
-}
-
-function formatPrice(value: number): string {
-    const theCoin = localStorage.getItem('coin') || 'SAR';
-    return `${value.toFixed(2)} ${theCoin}`;
-}
-
-function switchCurrency(price: number, target: 'USD' | 'SAR'): number {
-    const currentCoin = localStorage.getItem('coin') || 'SAR';
-
-    if (currentCoin === target) {
-        return price;
-    }
-
-    let converted: number;
-
-    if (target === 'USD') {
-        converted = price * 0.2665;
-    } else {
-        converted = price * 3.75;
-    }
-
-    localStorage.setItem('coin', target);
-    return converted;
-}
-
-
-function isProductInCart(productId: string | number): boolean {
-    return ibuy.some(item => String(item.id) === String(productId));
-}
-
-function isProductInWishlist(productId: string | number): boolean {
-    return wishlistItems.some(item => String(item.id) === String(productId));
-}
-
-function scrollToProductCard(productId: string | number): void {
-    const card = Array.from(document.querySelectorAll<HTMLElement>('.product-card'))
-        .find(item => item.getAttribute('data-id') === String(productId));
-    if (!card) return;
-
-    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    card.classList.add('ring-2', 'ring-gh-gold', 'ring-offset-2', 'ring-offset-[var(--bg)]');
-    window.setTimeout(() => {
-        card.classList.remove('ring-2', 'ring-gh-gold', 'ring-offset-2', 'ring-offset-[var(--bg)]');
-    }, 1800);
-}
-
-function readLocalStorageJSON<T>(key: string, fallback: T): T {
-    const raw = localStorage.getItem(key);
-    if (!raw) return fallback;
-
-    try {
-        return JSON.parse(raw) as T;
-    } catch (error) {
-        console.error(`Invalid localStorage data for ${key}:`, error);
-        return fallback;
-    }
-}
-
-function getAccountIdentity(): string {
-    const currentUserRaw = localStorage.getItem('currentUser');
-    if (currentUserRaw) {
-        try {
-            const user = JSON.parse(currentUserRaw) as { email?: string; id?: string | number; username?: string; name?: string };
-            const identity = user?.email || user?.id || user?.username || user?.name;
-            if (identity) return String(identity).trim().toLowerCase();
-        } catch (error) {
-            console.error('Error parsing current user data:', error);
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.add('light');
         }
-    }
-    return 'guest';
-}
-
-function getStorageKey(featureName: string): string {
-    return `${featureName}_${getAccountIdentity()}`;
-}
-
-function clamp(value: number, min: number, max: number): number {
-    return Math.min(max, Math.max(min, value));
-}
-
-function parseRating(value: unknown): number {
-    const parsed = Number.parseFloat(String(value ?? 0));
-    return Number.isFinite(parsed) ? clamp(parsed, 0, 5) : 0;
-}
-
-function escapeHTML(value: unknown): string {
-    return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
-
-// ==========================================
-// STATE INITIALIZATION FROM LOCALSTORAGE
-// ==========================================
-const lovesKey = getStorageKey('ilove');
-let wishlistItems: WishlistItem[] = readLocalStorageJSON<WishlistItem[]>(lovesKey, []);
-
-const cartKey = getStorageKey('cart');
-let ibuy: CartItem[] = readLocalStorageJSON<CartItem[]>(cartKey, []);
-
-const ordersKey = getStorageKey('orders');
-let userOrders: OrderRecord[] = readLocalStorageJSON<OrderRecord[]>(ordersKey, []);
-
-const productStatsStorageKey = 'market_product_stats_v1';
-let productStats: Record<string, ProductStats> = readLocalStorageJSON<Record<string, ProductStats>>(productStatsStorageKey, {});
-let suggestions: SuggestionItem[] = [];
-
-let globalProductsList: Product[] = [];
-const productQuantityInputs = new Map<string, HTMLInputElement>();
-
-// ==========================================
-// DOM REFERENCES (for cart, wishlist, etc.)
-// ==========================================
-const productTemplate = document.getElementById('product-card-template') as HTMLTemplateElement | null;
-const productGrid = document.getElementById('product-grid') as HTMLElement | null;
-const wishBadge = document.getElementById('wishBadge') as HTMLSpanElement | null;
-const wishGrid = document.querySelector('#wishGrid') as HTMLElement | null;
-const wishlistEmptyMsg = document.querySelector('#wishlistEmptyMsg') as HTMLElement | null;
-
-const cartTotalLabel = document.getElementById('cartTotalLabel') as HTMLElement | null;
-const cartTotalValue = document.getElementById('cartTotalValue') as HTMLElement | null;
-// Find the existing checkout button without attaching print logic.
-const btnCheckout = document.querySelector<HTMLButtonElement>('button[id^="btn"][id$="Invoice"]');
-const cartEmptyMsg = document.getElementById('cartEmptyMsg') as HTMLElement | null;
-const cartItemsList = document.getElementById('cartItemsList') as HTMLElement | null;
-const cartSuggestions = document.getElementById('cartSuggestions') as HTMLElement | null;
-const suggestionmasg = document.getElementById('cartSuggestionsTitle') as HTMLElement | null;
-const cartBadge = document.getElementById('cartBadge') as HTMLElement | null;
-const userOrdersContainer = document.getElementById('userOrdersContainer') as HTMLElement | null;
-const emptyOrdersNotice = document.getElementById('emptyOrdersNotice') as HTMLElement | null;
-const ordersCountBadge = document.getElementById('ordersCountBadge') as HTMLElement | null;
-
-// ==========================================
-// PERSISTENCE HELPERS
-// ==========================================
-function saveWishlist(): void {
-    localStorage.setItem(lovesKey, JSON.stringify(wishlistItems));
-}
-
-function saveCart(): void {
-    localStorage.setItem(cartKey, JSON.stringify(ibuy));
-}
-
-function saveOrders(): void {
-    localStorage.setItem(ordersKey, JSON.stringify(userOrders));
-}
-
-function saveProductStats(): void {
-    localStorage.setItem(productStatsStorageKey, JSON.stringify(productStats));
-}
-
-function getProductStats(product: Product): ProductStats {
-    const id = String(product.id);
-    const existing = productStats[id];
-    const safeStats: ProductStats = {
-        stock: Math.max(0, Number(existing?.stock ?? product.stock) || 0),
-        purchasesCount: Math.max(0, Number(existing?.purchasesCount ?? product.purchasesCount) || 0),
-        baseRating: parseRating(existing?.baseRating ?? product.rating),
-        baseReviewsCount: Math.max(0, Number(existing?.baseReviewsCount ?? product.reviewsCount) || 0),
-        ratingsByAccount: existing?.ratingsByAccount && typeof existing.ratingsByAccount === 'object'
-            ? existing.ratingsByAccount
-            : {},
-    };
-
-    productStats[id] = safeStats;
-    return safeStats;
-}
-
-function getValidRatingCount(stats: ProductStats): number {
-    return Object.values(stats.ratingsByAccount).filter(value => parseRating(value) > 2).length;
-}
-
-function getRatingBonus(stats: ProductStats): number {
-    let currentRating = clamp(stats.baseRating, 0, 5);
-    let bonus = 0;
-    const ratings = Object.values(stats.ratingsByAccount)
-        .map(parseRating)
-        .filter(rating => rating > 2)
-        .sort((a, b) => b - a);
-
-    // Each pair comes from different accounts because the object key is the account identity.
-    for (let index = 0; index + 1 < ratings.length; index += 2) {
-        const first = ratings[index];
-        const second = ratings[index + 1];
-        if (first === undefined || second === undefined) continue;
-
-        const pairTarget = Math.min(first, second);
-
-        // Ignore ratings that do not exceed the current product rating.
-        if (pairTarget <= currentRating) continue;
-
-        // An equal pair may add two stars, but never beyond the submitted rating.
-        const requestedBonus = first === second ? 2 : 1;
-        const allowedBonus = Math.min(requestedBonus, pairTarget - currentRating, 5 - currentRating);
-        if (allowedBonus <= 0) continue;
-
-        currentRating += allowedBonus;
-        bonus += allowedBonus;
-        if (currentRating >= 5) break;
-    }
-
-    return bonus;
-}
-
-function getEffectiveProductRating(stats: ProductStats): number {
-    return clamp(stats.baseRating + getRatingBonus(stats), 0, 5);
-}
-
-function applyProductStats(product: Product): void {
-    const stats = getProductStats(product);
-    product.stock = stats.stock;
-    product.purchasesCount = stats.purchasesCount;
-    product.rating = getEffectiveProductRating(stats).toFixed(1);
-}
-
-function persistProductStatsToLoadedProducts(): void {
-    globalProductsList.forEach(applyProductStats);
-    saveProductStats();
-}
-
-function getCurrentAccountRating(productId: string | number): number {
-    const stats = productStats[String(productId)];
-    if (!stats) return 0;
-    return clamp(Number(stats.ratingsByAccount[getAccountIdentity()] || 0), 0, 5);
-}
-
-function updateProductRating(productId: string | number, rating: number): void {
-    const product = globalProductsList.find(item => String(item.id) === String(productId));
-    if (!product) return;
-
-    const stats = getProductStats(product);
-    const accountId = getAccountIdentity();
-    const normalizedRating = clamp(Math.round(Number(rating) || 0), 0, 5);
-
-    if (normalizedRating === 0) {
-        delete stats.ratingsByAccount[accountId];
-    } else {
-        stats.ratingsByAccount[accountId] = normalizedRating;
-    }
-
-    applyProductStats(product);
-    saveProductStats();
-    updateMainProductMetrics();
-    renderOrders();
-}
-
-// ==========================================
-// SYNC FUNCTIONS
-// ==========================================
-function updateMainProductMetrics(): void {
-    const cards = document.querySelectorAll<HTMLElement>('.product-card');
-    cards.forEach(card => {
-        const product = globalProductsList.find(item => String(item.id) === String(card.getAttribute('data-id')));
-        if (!product) return;
-
-        const ratingElement = card.querySelector<HTMLElement>('.product-rating');
-        const reviewsElement = card.querySelector<HTMLElement>('.product-reviews');
-        const purchasesElement = card.querySelector<HTMLElement>('.product-purchases');
-        const stockElement = card.querySelector<HTMLElement>('.product-stock');
-        const productState = getProductStats(product);
-        const validRatingsCount = getValidRatingCount(productState);
-        const totalReviewsCount = productState.baseReviewsCount + validRatingsCount;
-
-        if (ratingElement) ratingElement.textContent = product.rating;
-        if (reviewsElement) reviewsElement.textContent = `(${totalReviewsCount})`;
-        if (purchasesElement) purchasesElement.textContent = String(productState.purchasesCount);
-        if (stockElement) stockElement.textContent = String(productState.stock);
-    });
-}
-
-function updateMainProductCardPrices(): void {
-    const cards = document.querySelectorAll<HTMLElement>('.product-card');
-    cards.forEach(card => {
-        const priceElement = card.querySelector<HTMLElement>('.product-price');
-        const oldPriceElement = card.querySelector<HTMLElement>('.product-old-price');
-        const product = globalProductsList.find(p => String(p.id) === String(card.getAttribute('data-id')));
-
-        if (!product || !priceElement) return;
-
-        const discountedPrice = calculateDiscountedPrice(product.price, product.discount);
-        priceElement.textContent = formatPrice(discountedPrice);
-
-        if (oldPriceElement && product.oldPrice) {
-            oldPriceElement.textContent = formatPrice(product.oldPrice);
-        }
-    });
-}
-
-function syncMainProductStates(): void {
-    const cards = document.querySelectorAll<HTMLElement>('.product-card');
-
-    cards.forEach(card => {
-        const productId = card.getAttribute('data-id');
-        if (!productId) return;
-
-        const inCart = isProductInCart(productId);
-        const inWishlist = isProductInWishlist(productId);
-
-        const product = globalProductsList.find(item => String(item.id) === String(productId));
-        const addButton = card.querySelector<HTMLButtonElement>('.btn-add-to-cart');
-        const wishlistButton = card.querySelector<HTMLButtonElement>('.btn-wishlist-toggle');
-        const wishlistIcon = card.querySelector<HTMLElement>('.wishlist-icon');
-        const quantityInput = productQuantityInputs.get(productId);
-        const decreaseButton = card.querySelector<HTMLButtonElement>('.qty-decrement-btn');
-        const increaseButton = card.querySelector<HTMLButtonElement>('.qty-increment-btn');
-        const outOfStock = !!product && getProductStats(product).stock <= 0;
-
-        // Keep the product card visible and set its quantity to zero when stock runs out.
-        if (quantityInput && outOfStock) {
-            quantityInput.value = '0';
-            quantityInput.min = '0';
-        } else if (quantityInput && quantityInput.value === '0') {
-            quantityInput.value = '1';
-            quantityInput.min = '1';
-        }
-        if (decreaseButton) decreaseButton.disabled = outOfStock;
-        if (increaseButton) increaseButton.disabled = outOfStock;
-
-        // Update cart button state
-        if (addButton) {
-            addButton.disabled = inCart || outOfStock;
-            addButton.textContent = outOfStock ? 'Out of Stock' : (inCart ? 'In Cart ✓' : 'Add to Cart');
-            addButton.classList.toggle('opacity-50', inCart);
-            addButton.classList.toggle('cursor-not-allowed', inCart);
-            addButton.classList.toggle('bg-gray-600', inCart || outOfStock);
-            addButton.classList.toggle('text-white', inCart || outOfStock);
-            addButton.classList.toggle('border-gray-600', inCart || outOfStock);
-            addButton.classList.toggle('hover:bg-gh-gold', !inCart && !outOfStock);
-            addButton.classList.toggle('hover:text-black', !inCart && !outOfStock);
-            addButton.classList.toggle('bg-gh-gold/10', !inCart && !outOfStock);
-            addButton.classList.toggle('text-gh-gold', !inCart && !outOfStock);
-            addButton.classList.toggle('border-gh-gold/60', !inCart && !outOfStock);
-        }
-
-        // Update wishlist heart icon
-        if (wishlistButton && wishlistIcon) {
-            wishlistIcon.classList.toggle('ri-poker-hearts-fill', inWishlist);
-            wishlistIcon.classList.toggle('ri-poker-hearts-line', !inWishlist);
-            wishlistIcon.classList.toggle('text-gh-gold', inWishlist);
-            wishlistIcon.classList.toggle('text-white', !inWishlist);
-        }
-
-        // Sync quantity input with cart quantity
-        const cartQuantityInput = productQuantityInputs.get(productId);
-        if (cartQuantityInput) {
-            const cartItem = ibuy.find(item => String(item.id) === String(productId));
-            if (cartItem) {
-                cartQuantityInput.value = String(cartItem.quantity || 1);
-            } else if (!outOfStock) {
-                cartQuantityInput.value = '1';
-                cartQuantityInput.min = '1';
-            }
-        }
-    });
-
-    // Refresh metrics and prices after cart or purchase changes.
-    updateMainProductMetrics();
-    updateMainProductCardPrices();
-}
-
-function syncWishlistButtonStates(): void {
-    const buttons = document.querySelectorAll<HTMLButtonElement>('.btn-wish-add-cart');
-    buttons.forEach(button => {
-        const itemId = button.getAttribute('data-product-id');
-        if (!itemId) return;
-
-        const inCart = isProductInCart(itemId);
-        button.disabled = inCart;
-        button.textContent = inCart ? 'Added ✓' : 'Add to Cart';
-        button.classList.toggle('opacity-50', inCart);
-        button.classList.toggle('cursor-not-allowed', inCart);
-        button.classList.toggle('bg-gray-600', inCart);
-        button.classList.toggle('text-white', inCart);
-        button.classList.toggle('border-gray-600', inCart);
-
-        if (inCart) {
-            button.classList.remove('bg-gh-gold/10', 'text-gh-gold', 'border', 'border-gh-gold/30', 'hover:bg-gh-gold', 'hover:text-black');
-        } else {
-            button.classList.add('bg-gh-gold/10', 'text-gh-gold', 'border', 'border-gh-gold/30');
-            button.classList.remove('bg-gray-600', 'text-white', 'border-gray-600');
-            button.classList.add('hover:bg-gh-gold', 'hover:text-black');
-        }
-    });
-}
-
-function updateProductQuantityInput(productId: string | number, quantity: number): void {
-    const input = productQuantityInputs.get(String(productId));
-    if (input) {
-        input.value = String(quantity);
-    }
-}
-
-// Synchronize cart quantity from UI input and re-render
-function syncQuantityWithCart(productId: string | number, quantity: number): void {
-    const cartItem = ibuy.find(item => String(item.id) === String(productId));
-    if (!cartItem) return;
-
-    const product = globalProductsList.find(item => String(item.id) === String(productId));
-    const safeLimit = product ? Math.max(0, Number(product.stock) || 0) : Math.max(0, Number(cartItem.stock) || 0);
-    if (safeLimit === 0) {
-        ibuy = ibuy.filter(item => String(item.id) !== String(productId));
-        saveCart();
-        filtersuggestions(globalProductsList);
-        addtocart();
-        return;
-    }
-
-    const safeQuantity = Math.min(Math.max(1, Number(quantity) || 1), safeLimit);
-    cartItem.quantity = safeQuantity;
-    if (product) {
-        cartItem.stock = product.stock;
-    }
-    saveCart();
-    filtersuggestions(globalProductsList);
-    addtocart();
-    syncMainProductStates();
-    syncWishlistButtonStates();
-}
-
-// ==========================================
-// ORDERS: SNAPSHOT, RENDERING & RATINGS
-// ==========================================
-function createOrderId(): string {
-    return `order_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function getOrderTotal(items: CartItem[]): { totalQuantity: number; totalPrice: number } {
-    return items.reduce((totals, item) => {
-        const quantity = Math.max(1, Number(item.quantity) || 1);
-        const unitPrice = typeof item.price === 'number'
-            ? item.price
-            : Number.parseFloat(String(item.price)) || 0;
-        totals.totalQuantity += quantity;
-        totals.totalPrice += unitPrice * quantity;
-        return totals;
-    }, { totalQuantity: 0, totalPrice: 0 });
-}
-
-function getNextOrderNumber(): number {
-    const highestExistingNumber = userOrders.reduce((highest, order) => {
-        const value = Number(order.orderNumber);
-        return Number.isFinite(value) ? Math.max(highest, value) : highest;
-    }, 0);
-    return highestExistingNumber + 1;
-}
-
-function createOrderRecord(items: CartItem[], createdAt = Date.now()): OrderRecord {
-    const totals = getOrderTotal(items);
-    const products: OrderProductSnapshot[] = items.map(item => ({
-        id: item.id,
-        title: item.nameAr || item.nameEn || item.title || 'Product',
-        image: item.img || '',
-        quantity: Math.max(1, Number(item.quantity) || 1),
-        unitPrice: typeof item.price === 'number' ? item.price : Number.parseFloat(String(item.price)) || 0,
-        itemTotalPrice: (typeof item.price === 'number' ? item.price : Number.parseFloat(String(item.price)) || 0)
-            * Math.max(1, Number(item.quantity) || 1),
-    }));
-
-    return {
-        id: createOrderId(),
-        orderNumber: getNextOrderNumber(),
-        currency: localStorage.getItem('coin') || 'SAR',
-        totalQuantity: totals.totalQuantity,
-        totalPrice: Number(totals.totalPrice.toFixed(2)),
-        time: new Date(createdAt).toLocaleString(),
-        createdAt,
-        products,
-    };
-}
-
-interface OrderTemplateData {
-    id: string;
-    orderNumber: number;
-    currency: string;
-    totalQuantity: number;
-    totalPrice: number;
-    time: string;
-    products: OrderProductSnapshot[];
-}
-
-function renderOrderTemplate(data: OrderTemplateData): string {
-    const productsHTML = data.products.map(product => {
-        const currentRating = getCurrentAccountRating(product.id);
-        const title = escapeHTML(product.title);
-        const image = product.image ? escapeHTML(product.image) : '';
-        const safeId = escapeHTML(product.id);
-
-        return `
-            <div class="order-product-row product-click-trigger cursor-pointer flex items-center gap-2 border-b border-gh-gold/30 py-2" data-product-id="${safeId}">
-                <div class="w-9 h-9 rounded overflow-hidden bg-black/10 shrink-0">
-                    <img src="${image || 'https://via.placeholder.com/80'}" alt="${title}" class="w-full h-full object-cover" loading="lazy">
-                </div>
-                <div class="flex flex-col min-w-0 flex-1">
-                    <h4 class="text-xs font-medium text-[var(--text)] truncate" title="${title}">${title}</h4>
-                    <span class="text-[11px] text-[var(--text-dim)]">Qty: <strong class="text-gh-gold">${product.quantity}</strong></span>
-                    <span class="text-[10px] text-gh-gold">${product.itemTotalPrice.toFixed(2)} ${escapeHTML(data.currency)}</span>
-                </div>
-                <div class="flex items-center gap-1 shrink-0" data-order-rating="${safeId}">
-                    <button type="button" data-rating-action="decrease" data-order-id="${escapeHTML(data.id)}" data-product-id="${safeId}"
-                        class="order-rating-arrow w-6 h-6 rounded-full border border-gh-line text-[var(--text-dim)] hover:text-gh-gold transition-colors" aria-label="Decrease rating">↓</button>
-                    <span class="order-rating-value min-w-[32px] text-center text-xs text-gh-gold" aria-label="Rating">★ ${currentRating}</span>
-                    <button type="button" data-rating-action="increase" data-order-id="${escapeHTML(data.id)}" data-product-id="${safeId}"
-                        class="order-rating-arrow w-6 h-6 rounded-full border border-gh-line text-[var(--text-dim)] hover:text-gh-gold transition-colors" aria-label="Increase rating">↑</button>
+    </script>
+</head>
+
+<body class="bg-[var(--bg)] text-[var(--text)] antialiased relative">
+
+    <!-- Main Application Header -->
+    <header class="sticky top-0 z-40 w-full backdrop-blur bg-[var(--bg)]/90 border-b border-gh-line">
+        <div
+            class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4 md:gap-8">
+
+            <!-- Brand Logo & Name -->
+            <h1 id="brandLogo" class="flex items-center gap-2 shrink-0 cursor-pointer select-none group">
+                <i id="brandLogoIcon"
+                    class="ri-flower-fill text-gh-gold text-2xl md:text-3xl transition-transform group-hover:scale-105"></i>
+                <span
+                    class="hidden md:block  font-display tracking-[0.18em] text-base font-semibold group-hover:text-gh-gold text-[var(--text)] transition-colors whitespace-nowrap">
+                    GHALLAB
+                </span>
+            </h1>
+
+            <!-- Desktop Search Bar -->
+            <div class="hidden md:block flex-1 max-w-2xl mx-4 lg:mx-8">
+                <div
+                    class="w-full flex items-center gap-3 border border-gh-line rounded-full px-4 h-11 focus-within:border-gh-gold transition-all duration-200 bg-transparent">
+                    <i class="ri-search-line text-gh-textdim text-lg shrink-0"></i>
+                    <input id="desktopSearchInput" type="text"
+                        placeholder="Search for products, brands, or categories..."
+                        data-i18n-placeholder="search_placeholder"
+                        class="bg-transparent outline-none w-full text-sm placeholder:text-[var(--text-dim)] text-[var(--text)]">
                 </div>
             </div>
-        `;
-    }).join('');
 
-    return `
-        <article class="order-card bg-[var(--bg-card)] border border-gh-line rounded-xl p-3 flex flex-col gap-2 w-full" data-order-id="${escapeHTML(data.id)}">
-            <div class="border-b border-gh-line/50 pb-2 flex flex-col gap-1">
-                <div class="flex items-center justify-between gap-2">
-                    <strong class="text-sm tracking-wide text-gh-gold">Order ${data.orderNumber}</strong>
-                    <div class="flex items-center gap-2">
-                        <span class="text-[10px] text-[var(--text-dim)]">${escapeHTML(data.time)}</span>
-                        <button type="button" data-print-order="${escapeHTML(data.id)}"
-                            class="order-print-btn border border-gh-gold/40 text-gh-gold rounded-full px-2 py-1 text-[10px] hover:bg-gh-gold hover:text-black transition-colors">
-                            Print
+            <!-- Mobile Spacer -->
+            <div class="flex-1 md:hidden"></div>
+
+            <!-- Header Action Controls -->
+            <div id="headerActions" class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+                <button id="btnSearch" class="icon-btn md:hidden focus-within:border-gh-gold" title="Search"
+                    aria-label="Search">
+                    <i class="ri-search-line text-base"></i>
+                </button>
+                <button id="btnWishlist" class="icon-btn relative focus-within:border-gh-gold" title="Wishlist"
+                    aria-label="Wishlist">
+                    <i class="ri-heart-3-line text-base"></i>
+                    <span class="badge" id="wishBadge">0</span>
+                </button>
+                <button id="btnCart" class="icon-btn relative focus-within:border-gh-gold" title="Shopping Cart"
+                    aria-label="Shopping Cart">
+                    <i class="ri-shopping-bag-3-line text-base"></i>
+                    <span class="badge" id="cartBadge">0</span>
+                </button>
+                <button id="btnSettings" class="icon-btn hidden sm:flex focus-within:border-gh-gold" title="Settings"
+                    aria-label="Settings">
+                    <i class="ri-settings-3-line text-base"></i>
+                </button>
+                <button id="themeToggle" class="icon-btn focus-within:border-gh-gold" title="Toggle Theme"
+                    aria-label="Toggle Theme">
+                    <i id="iconMoon" class="ri-moon-fill text-sm"></i>
+                    <i id="iconSun" class="ri-sun-fill text-sm hidden"></i>
+                </button>
+                <button id="btnAccount" class="icon-btn p-0.5 overflow-hidden rounded-full focus-within:border-gh-gold"
+                    title="User Account" aria-label="User Account">
+                    <img id="headerAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=DarkMan"
+                        class="w-full h-full rounded-full object-cover" alt="User Avatar">
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel: Mobile Search -->
+        <div class="acc-panel border-t border-gh-line md:hidden max-h-[calc(100vh-5rem)] overflow-y-auto hidden"
+            id="panelSearch" data-panel>
+            <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 py-4">
+                <div
+                    class="flex items-center gap-2 border border-gh-line rounded-full px-4 h-11 focus-within:border-gh-gold transition-colors">
+                    <i class="ri-search-line text-gh-textdim shrink-0"></i>
+                    <input id="mobileSearchInput" type="text"
+                        placeholder="Search for products, brands, or categories..."
+                        data-i18n-placeholder="search_placeholder"
+                        class="bg-transparent outline-none w-full text-sm placeholder:text-[var(--text-dim)]">
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel: Wishlist -->
+        <div class="acc-panel border-t border-gh-line max-h-[calc(100vh-5rem)] overflow-y-auto hidden"
+            id="panelWishlist" data-panel>
+            <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <p class="font-display text-sm tracking-[0.2em] text-gh-gold mb-4" data-i18n="wishlist_title">
+                    Wishlist
+                </p>
+
+                <!-- Empty state message -->
+                <p id="wishlistEmptyMsg" class="text-sm text-[var(--text-dim)] hidden" data-i18n="wishlist_empty">
+                    You haven't added any items to your wishlist yet — click the heart icon on any product card to save
+                    it here.
+                </p>
+
+                <!-- Wishlist Horizontal Scroll Container -->
+                <div id="wishGrid"
+                    class="flex items-center gap-4 mt-5 overflow-x-auto pb-4 scrollbar-thin scroll-smooth">
+                    <!-- Dynamic items will be rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel: Shopping Cart -->
+        <div class="acc-panel border-t border-gh-line max-h-[calc(100vh-5rem)] overflow-y-auto hidden" id="panelCart"
+            data-panel>
+            <div class="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col h-full box-border">
+
+                <!-- Header & Total & Action Buttons -->
+                <div
+                    class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2 mb-4 shrink-0">
+                    <p class="font-display text-xs sm:text-sm tracking-[0.15em] sm:tracking-[0.2em] text-gh-gold"
+                        data-i18n="cart_title">
+                        Shopping Cart
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                        <p class="text-[11px] sm:text-xs text-[var(--text-dim)] whitespace-nowrap" id="cartTotalLabel"
+                            data-i18n="cart_total">
+                            Total: <span id="cartTotalValue" class="font-semibold text-[var(--text-main)]">0.00</span>
+                            SAR
+                        </p>
+                        <!-- Issue 2: Consolidated Print & Buy Button -->
+                        <button id="btnPrintInvoice"
+                            class="btn-gold font-display text-[10px] sm:text-xs tracking-wide rounded-full px-3 sm:px-5 py-1.5 sm:py-2 transition-all whitespace-nowrap w-full sm:w-auto"
+                            data-i18n="btn_print">
+                            <i class="ri-printer-line mr-1"></i>Print & Buy
                         </button>
                     </div>
                 </div>
-                <span class="text-[10px] text-gh-gold">This order is final and cannot be returned.</span>
+
+                <!-- Empty State Message -->
+                <p id="cartEmptyMsg" class="text-sm text-[var(--text-dim)] hidden mb-6" data-i18n="cart_empty">
+                    Your cart is empty — add items from the list below.
+                </p>
+
+                <!-- Vertical Cart Items List Container - Issue 3: Fixed responsive layout -->
+                <div id="cartItemsList"
+                    class="space-y-2 sm:space-y-3 mb-4 flex-1 overflow-y-auto pr-2 scrollbar-thin w-full max-w-full box-border">
+                    <!-- Dynamic Cart Items Rendered Here -->
+                </div>
+
+                <!-- Product Suggestions Section -->
+                <div id="cartSuggestionsTitle" class="hidden">
+                    <div class="hairline my-4 border-b border-gh-line/50"></div>
+                    <p class="text-xs tracking-[0.2em] text-gh-gold mb-3" data-i18n="cart_suggestions">
+                        You Might Also Like
+                    </p>
+                </div>
+
+                <!-- Product Suggestions (Horizontal Scroll) - Issue 3: Improved overflow handling -->
+                <div id="cartSuggestions"
+                    class="flex flex-nowrap items-start gap-2 sm:gap-3 overflow-x-auto overflow-y-hidden pb-2 scrollbar-thin scroll-smooth snap-x snap-mandatory w-full max-w-full shrink-0 box-border">
+                    <!-- Dynamic Suggested Items Rendered Here -->
+                </div>
+
             </div>
-            <div class="max-h-56 overflow-y-auto pr-1 flex flex-col gap-1">
-                ${productsHTML}
+        </div>
+
+        <!-- Panel: Settings -->
+        <div class="acc-panel border-t border-gh-line max-h-[calc(100vh-5rem)] overflow-y-auto hidden"
+            id="panelSettings" data-panel>
+            <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7">
+                <p class="font-display text-sm tracking-[0.2em] text-gh-gold mb-6" data-i18n="settings_title">
+                    Settings
+                </p>
+
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Language Choice -->
+                    <div class="settings-card border border-gh-line p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="ri-translate-2 text-gh-gold"></i>
+                            <p class="text-xs tracking-[0.25em] text-gh-gold" data-i18n="setting_language">Language</p>
+                        </div>
+                        <div id="langGroup" class="flex flex-wrap gap-2" data-settings-group>
+                            <span id="btnLangAr" class="pill cursor-pointer">العربية</span>
+                            <span id="btnLangEn" class="pill active cursor-pointer">English</span>
+                        </div>
+                    </div>
+
+                    <!-- Currency Choice -->
+                    <div class="settings-card border border-gh-line p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="ri-money-dollar-circle-line text-gh-gold"></i>
+                            <p class="text-xs tracking-[0.25em] text-gh-gold" data-i18n="setting_currency">Currency</p>
+                        </div>
+                        <div id="currencyGroup" class="flex flex-wrap gap-2" data-settings-group>
+                            <span id="btnCurrSar" class="pill active cursor-pointer">SAR</span>
+                            <span id="btnCurrUsd" class="pill cursor-pointer">USD</span>
+                        </div>
+                    </div>
+
+                    <!-- Clear Order History -->
+                    <div class="settings-card border border-gh-line p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="ri-history-line text-gh-gold"></i>
+                            <p class="text-xs tracking-[0.25em] text-gh-gold" data-i18n="setting_clear_orders">Order
+                                History</p>
+                        </div>
+                        <div>
+                            <button id="btnClearOrders" type="button"
+                                class="w-full border border-gh-gold/40 text-gh-gold hover:bg-gh-gold/10 font-display text-xs tracking-wider rounded-lg px-4 py-2 transition-colors active:scale-95 flex items-center justify-center gap-2"
+                                data-i18n="btn_clear_orders">
+                                <i class="ri-file-reduce-line"></i>
+                                <span>Clear Order History</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Delete Account -->
+                    <div class="settings-card border border-red-500/30 p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="ri-delete-bin-7-line text-red-500"></i>
+                            <p class="text-xs tracking-[0.25em] text-red-500" data-i18n="setting_delete_account">Delete
+                                Account</p>
+                        </div>
+                        <div>
+                            <button id="btnDeleteAccount" type="button"
+                                class="w-full border border-red-500/40 text-red-500 hover:bg-red-500/10 font-display text-xs tracking-wider rounded-lg px-4 py-2 transition-colors active:scale-95 flex items-center justify-center gap-2"
+                                data-i18n="btn_delete_account">
+                                <i class="ri-user-unfollow-line"></i>
+                                <span>Delete Account</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="flex items-center justify-between pt-2 border-t border-gh-gold/60">
-                <span class="text-[11px] text-[var(--text-dim)]">Total Qty: <strong class="text-gh-gold">${data.totalQuantity}</strong></span>
-                <span class="text-xs font-semibold text-gh-gold">Total: ${data.totalPrice.toFixed(2)} ${escapeHTML(data.currency)}</span>
+        </div>
+
+        <!-- Panel: Account Profile -->
+        <div class="acc-panel border-t border-gh-line max-h-[calc(100vh-5rem)] overflow-y-auto hidden" id="panelAccount"
+            data-panel>
+            <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
+
+                <!-- User Profile Summary Header -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-gh-line pb-6">
+                    <div class="flex items-center gap-4 w-full sm:w-auto justify-center sm:justify-start">
+                        <div class="relative w-16 h-16 shrink-0">
+                            <img id="userAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=DarkMan"
+                                class="w-full h-full rounded-full object-cover border border-[var(--border)]"
+                                alt="User Profile Image">
+                            <input type="file" id="avatarInput" accept="image/*" class="hidden">
+                            <label for="avatarInput" id="btnUploadAvatar"
+                                class="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-black/70 border border-gh-gold text-gh-gold flex items-center justify-center cursor-pointer hover:bg-gh-gold hover:text-black transition-all duration-200 shadow-md"
+                                title="Change Avatar">
+                                <i class="ri-edit-line text-xs"></i>
+                            </label>
+                        </div>
+                        <div>
+                            <p id="profileDisplayName" class="font-medium tracking-wide">Abu Al-Tayyib</p>
+                            <p id="profileDisplayEmail" class="text-xs text-[var(--text-dim)]">abualtayyib@example.com
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button id="btnUserOrders" class="pill hover:border-gh-gold transition-colors text-xs px-4 py-2"
+                            data-i18n="btn_my_orders">
+                            My Orders
+                        </button>
+                        <button id="btnLogout"
+                            class="pill hover:border-red-500 hover:text-red-500 transition-colors text-xs px-4 py-2"
+                            data-i18n="btn_logout">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Orders Section Space -->
+                <div id="userOrdersSection" class="mt-1 hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <i class="ri-shopping-bag-3-line text-gh-gold"></i>
+                            <h3 class="text-sm font-medium tracking-wide text-gh-gold" data-i18n="title_my_orders">My
+                                Orders History</h3>
+                        </div>
+                        <span id="ordersCountBadge"
+                            class="text-xs bg-gh-gold/10 text-gh-gold px-2.5 py-1 rounded-full border border-gh-gold/20">0
+                            Orders</span>
+                    </div>
+
+                    <!-- Dynamic Orders Target Container -->
+                    <div id="userOrdersContainer" class="flex flex-col gap-2.5 min-h-[120px]">
+                        <!-- Placeholder / Empty State -->
+                        <div id="emptyOrdersNotice"
+                            class="flex flex-col items-center justify-center py-8 border border-dashed border-gh-line/60 rounded-xl text-[var(--text-dim)] bg-[var(--bg-card)]/30">
+                            <div>
+                                <i class="ri-inbox-archive-line text-3xl mb-2 opacity-40 text-gh-gold"></i>
+                                <p class="text-xs font-normal" data-i18n="msg_no_orders">No orders placed yet.</p>
+                            </div>
+                            <div>
+                                Put it Here
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Username Update Card -->
+                    <div class="settings-card border border-gh-line p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="ri-user-3-line text-gh-gold"></i>
+                            <p class="text-xs tracking-[0.25em] text-gh-gold" data-i18n="account_personal_info">Personal
+                                Profile</p>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                            <label for="userNameInput" class="text-sm text-[var(--text-dim)]"
+                                data-i18n="label_username">Username</label>
+                            <div class="flex items-center gap-2">
+                                <input type="text" id="userNameInput" value="Abu Al-Tayyib"
+                                    class="w-full bg-[var(--bg-card)] text-[var(--text)] text-sm px-3 py-2 rounded border border-[var(--border)] focus:outline-none focus:border-gh-gold transition-colors">
+                                <button id="btnSaveUsername"
+                                    class="shrink-0 text-xs px-4 py-2 bg-gh-gold text-black font-semibold rounded hover:bg-opacity-90 transition-opacity"
+                                    data-i18n="btn_save">
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email Update Card -->
+                    <div class="settings-card border border-gh-line p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="ri-mail-line text-gh-gold"></i>
+                            <p class="text-xs tracking-[0.25em] text-gh-gold" data-i18n="account_email">Email Address
+                            </p>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                            <label for="userEmailInput" class="text-sm text-[var(--text-dim)]"
+                                data-i18n="label_email">Email</label>
+                            <div class="flex items-center gap-2">
+                                <input type="email" id="userEmailInput" value="abualtayyib@example.com"
+                                    class="w-full bg-[var(--bg-card)] text-[var(--text)] text-sm px-3 py-2 rounded border border-[var(--border)] focus:outline-none focus:border-gh-gold transition-colors">
+                                <button id="btnSaveEmail"
+                                    class="shrink-0 text-xs px-4 py-2 border border-gh-gold text-gh-gold font-semibold rounded hover:bg-gh-gold hover:text-black transition-all"
+                                    data-i18n="btn_change">
+                                    Change
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Password Update Card -->
+                    <div class="settings-card border border-gh-line p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="ri-lock-password-line text-gh-gold"></i>
+                            <p class="text-xs tracking-[0.25em] text-gh-gold" data-i18n="account_security">Security</p>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-[var(--text-dim)]" data-i18n="label_password">Password</span>
+                                <span class="text-xs text-[var(--text-dim)] opacity-70"
+                                    data-i18n="password_last_change">Last changed: 1 month ago</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="password" id="userPasswordInput" value="••••••••" readonly
+                                    class="w-full bg-[var(--bg-card)] text-[var(--text)] text-sm px-3 py-2 rounded border border-[var(--border)] focus:outline-none">
+                                <button id="btnChangePassword"
+                                    class="shrink-0 text-xs px-4 py-2 border border-gh-gold text-gh-gold font-semibold rounded hover:bg-gh-gold hover:text-black transition-all"
+                                    data-i18n="btn_change">
+                                    Change
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-            <div class="text-[10px] text-[var(--text-dim)] opacity-70">
-                <span>Ratings above two stars count as valid.</span>
+        </div>
+    </header>
+
+    <!-- Buyer / Seller mode switcher -->
+    <div class="max-w-7xl mx-auto px-5 md:px-8 pt-6">
+        <div class="grid grid-cols-2 gap-2 rounded-full overflow-hidden">
+            <button id="btn-mode-buy"
+                class="mode-btn active border border-gh-line rounded-full font-display text-xs md:text-sm tracking-[0.2em] py-4 transition-colors">
+                <i class="ri-store-2-line ml-1"></i>
+                <span data-i18n="mode_buy">BUY</span>
+            </button>
+            <button id="btn-mode-sell"
+                class="mode-btn border border-gh-line font-display text-xs rounded-full md:text-sm tracking-[0.2em] py-4 transition-colors">
+                <i class="ri-price-tag-3-line ml-1"></i>
+                <span data-i18n="mode_sell">SELL</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ============ BUYER VIEW ============ -->
+    <section id="view-buy-section" class="max-w-7xl mx-auto px-5 md:px-8 py-8 md:py-14">
+        <!-- Mobile Filter Toggle Button -->
+        <div class="max-w-7xl mx-auto px-5 md:px-8 mt-4 md:hidden">
+            <button id="btn-toggle-filters" type="button"
+                class="w-full border border-gh-line rounded-xl py-2.5 px-4 flex items-center justify-center gap-2 text-xs font-display tracking-wider text-gh-gold bg-[var(--panel)]">
+                <i class="ri-filter-3-line"></i>
+                <span data-i18n="filter_toggle_btn">FILTER OPTIONS</span>
+            </button>
+        </div>
+
+        <div class="grid md:grid-cols-[260px_1fr] gap-8 items-start">
+
+            <!-- Sticky Filter Sidebar with custom scrollbar support -->
+            <aside id="filter-panel"
+                class="hidden md:block border border-gh-line rounded-2xl p-6 bg-[var(--panel)] md:sticky md:top-28 max-h-[calc(100vh-8rem)] overflow-y-auto">
+
+                <p class="font-display text-xs tracking-[0.25em] text-gh-gold mb-6" data-i18n="filter_title">FILTERS</p>
+
+                <!-- Sort By -->
+                <div class="mb-7" id="sort-group">
+                    <p class="text-xs text-[var(--text-dim)] mb-3 tracking-wide" data-i18n="sort_label">SORT BY</p>
+                    <div class="flex flex-wrap gap-2" id="sort-pills-container">
+                        <button type="button" class="pill active" data-sort="pop" data-i18n="sort_popular">Top
+                            Rated</button>
+                        <button type="button" class="pill" data-sort="new" data-i18n="sort_newest">Newest</button>
+                        <button type="button" class="pill" data-sort="sales" data-i18n="sort_bestselling">Best
+                            Selling</button>
+                    </div>
+                </div>
+
+                <!-- Price Range -->
+                <div class="mb-7" id="price-range-group">
+                    <p class="text-xs text-[var(--text-dim)] mb-3 tracking-wide" data-i18n="price_range_label">PRICE
+                        RANGE (SAR)</p>
+                    <div class="flex items-center gap-2">
+                        <input id="input-price-min" type="number" placeholder="Min" min="0"
+                            data-i18n-placeholder="price_min_placeholder"
+                            class="w-1/2 bg-transparent border border-gh-line rounded-lg px-3 py-2 text-sm outline-none focus:border-gh-gold">
+                        <span class="text-[var(--text-dim)]">—</span>
+                        <input id="input-price-max" type="number" placeholder="Max" min="0"
+                            data-i18n-placeholder="price_max_placeholder"
+                            class="w-1/2 bg-transparent border border-gh-line rounded-lg px-3 py-2 text-sm outline-none focus:border-gh-gold">
+                    </div>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="mb-7" id="category-group">
+                    <p class="text-xs text-[var(--text-dim)] mb-3 tracking-wide" data-i18n="category_label">CATEGORY /
+                        MODEL</p>
+                    <div class="flex flex-wrap gap-2" id="category-pills-container">
+                        <button type="button" class="pill active" data-cat="all" data-i18n="cat_all">All</button>
+                        <button type="button" class="pill" data-cat="coats" data-i18n="cat_coats">Coats</button>
+                        <button type="button" class="pill" data-cat="dresses" data-i18n="cat_dresses">Dresses</button>
+                        <button type="button" class="pill" data-cat="jackets" data-i18n="cat_jackets">Jackets</button>
+                        <button type="button" class="pill" data-cat="suits" data-i18n="cat_suits">Suits</button>
+                        <button type="button" class="pill" data-cat="accessories"
+                            data-i18n="cat_accessories">Accessories</button>
+                        <button type="button" class="pill" data-cat="shoes" data-i18n="cat_shoes">Shoes</button>
+                        <button type="button" class="pill" data-cat="shirts" data-i18n="cat_shirts">Shirts</button>
+                    </div>
+                </div>
+
+                <!-- Available Quantity -->
+                <div id="quantity-filter-group">
+                    <p class="text-xs text-[var(--text-dim)] mb-3 tracking-wide" data-i18n="stock_range_label">AVAILABLE
+                        QUANTITY</p>
+                    <input id="input-qty-range" type="range" min="1" max="20" value="1"
+                        class="w-full accent-gh-gold cursor-pointer">
+                    <div class="flex justify-end text-xs text-[var(--text-dim)] mt-1">
+                        <span id="label-qty-val">1</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Product Listing Grid Area -->
+            <main id="main-products-wrapper">
+                <div class="flex items-end justify-between mb-8">
+                    <div>
+                        <span class="font-serif text-gh-gold/80 tracking-[0.3em] text-xs"
+                            data-i18n="section_subtitle">THIS SEASON</span>
+                        <h2 class="font-display text-2xl md:text-3xl tracking-[0.06em] mt-2" data-i18n="section_title">
+                            Curated Selection</h2>
+                    </div>
+                    <p class="text-xs text-[var(--text-dim)]" id="label-results-count">— Items</p>
+                </div>
+
+                <!-- Container where items will be dynamically injected -->
+                <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </main>
+
+        </div>
+    </section>
+
+    <!-- Dynamic Product Card Template -->
+    <template id="product-card-template">
+        <article
+            class="product-card border border-gh-line rounded-2xl overflow-hidden bg-[var(--panel)] group flex flex-col justify-between h-full relative">
+
+            <!-- Image & Badges Container -->
+            <div class="relative aspect-[4/5] overflow-hidden bg-[var(--bg-card)]">
+                <img class="product-image w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    src="" alt="Product Thumbnail" loading="lazy">
+
+                <div
+                    class="product-desc-overlay absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-gradient-to-t from-black/80 via-black/30 to-transparent">
+                    <p class="product-description text-xs text-white/90 leading-relaxed line-clamp-4"></p>
+                </div>
+
+                <!-- زر المفضلة مع أيقونة Remixicon مفرغة بشكل افتراضي -->
+                <button type="button"
+                    class="btn-wishlist-toggle absolute top-3 left-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur border border-white/20 z-10 transition-all hover:scale-110 active:scale-95"
+                    title="Add to Wishlist" aria-label="Toggle Wishlist">
+                    <i class="wishlist-icon ri-poker-hearts-line text-sm text-white transition-colors"></i>
+                </button>
+
+                <span
+                    class="product-discount badge-discount hidden absolute top-3 right-3 bg-gh-gold text-black text-[10px] font-bold px-2 py-1 rounded-full z-10"></span>
             </div>
+
+            <!-- Card Content Body -->
+            <div class="p-5 flex flex-col flex-1 justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <h3 class="product-title font-display text-sm tracking-wide text-[var(--text)]"></h3>
+                    </div>
+
+                    <!-- Product Metrics -->
+                    <div class="flex items-center gap-3 text-xs text-[var(--text-dim)] mb-2">
+                        <span class="flex items-center gap-1">
+                            <i class="ri-star-fill text-gh-gold"></i>
+                            <span class="product-rating"></span>
+                            <span class="product-reviews opacity-70"></span>
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i class="ri-shopping-bag-3-line"></i>
+                            <span class="product-purchases"></span>
+                        </span>
+                    </div>
+
+                    <!-- Stock Count -->
+                    <p class="text-[11px] text-[var(--text-dim)] mb-4 flex items-center gap-1.5">
+                        <i class="ri-archive-2-line text-gh-gold"></i>
+                        <span><span data-i18n="stock_label">Stock:</span> <span
+                                class="product-stock font-semibold text-[var(--text)]"></span></span>
+                    </p>
+
+                    <!-- Pricing Details -->
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-baseline gap-2">
+                            <span class="product-price font-display text-gh-gold text-lg"></span>
+                            <span class="product-old-price hidden text-xs text-[var(--text-dim)] line-through"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Interactive Footer -->
+                <div>
+                    <div class="flex items-center gap-2">
+                        <div
+                            class="qty-stepper flex items-center border border-gh-line rounded-full overflow-hidden shrink-0">
+                            <button type="button"
+                                class="qty-decrement-btn w-7 h-8 flex items-center justify-center text-[var(--text-dim)] hover:text-gh-gold transition-colors focus:outline-none"
+                                aria-label="Decrease Quantity">−</button>
+                            <input type="number"
+                                class="qty-input w-8 text-center bg-transparent focus:outline-none text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                value="1" min="1">
+                            <button type="button"
+                                class="qty-increment-btn w-7 h-8 flex items-center justify-center text-[var(--text-dim)] hover:text-gh-gold transition-colors focus:outline-none"
+                                aria-label="Increase Quantity">+</button>
+                        </div>
+
+                        <button type="button"
+                            class="btn-add-to-cart btn-outline-gold flex-1 text-xs tracking-wide border border-gh-gold/60 text-gh-gold rounded-full px-4 py-2 hover:bg-gh-gold hover:text-black transition-colors focus:outline-none"
+                            data-i18n="btn_add_to_cart">
+                            Add to Cart
+                        </button>
+                    </div>
+                    <p class="qty-error-msg hidden text-[11px] text-red-400 mt-2"></p>
+                </div>
+            </div>
+
         </article>
-    `;
-}
+    </template>
 
-function createOrderHTML(items: CartItem[], orderId = createOrderId()): string {
-    const order = createOrderRecord(items);
-    order.id = orderId;
-    return renderOrderTemplate(order);
-}
+    <!--============SELLER VIEW============-->
+    <section id="viewSell" class="hidden max-w-7xl mx-auto px-5 md:px-8 py-10 md:py-14">
 
-function normalizeOrderNumbers(): void {
-    let nextNumber = 1;
-    const ordered = [...userOrders].sort((a, b) => Number(a.createdAt || 0) - Number(b.createdAt || 0));
+        <!-- Store Profile Section -->
+        <div id="sellerStoreProfilePanel"
+            class="border border-gh-line rounded-2xl p-6 md:p-8 bg-[var(--panel)] flex flex-col md:flex-row items-center gap-6 md:gap-8 mb-12">
 
-    ordered.forEach(order => {
-        const existingNumber = Number(order.orderNumber);
-        if (Number.isFinite(existingNumber) && existingNumber > 0) {
-            nextNumber = Math.max(nextNumber, existingNumber + 1);
-        } else {
-            order.orderNumber = nextNumber;
-            nextNumber += 1;
-        }
-    });
+            <!-- Store Image Upload -->
+            <label id="storeImageLabel"
+                class="relative w-28 h-28 rounded-full border border-dashed border-gh-line flex items-center justify-center cursor-pointer shrink-0 hover:border-gh-gold transition-colors overflow-hidden"
+                for="storeImageInput">
+                <img id="storeImagePreview" class="hidden w-full h-full object-cover" src="" alt="Store Avatar Preview">
+                <span id="storeImagePlaceholder"
+                    class="flex flex-col items-center text-[var(--text-dim)] text-[10px] gap-1 text-center px-2">
+                    <i id="storeImageIcon" class="ri-store-2-line text-xl"></i>
+                    <span data-i18n="seller.store_image">Store Image</span>
+                </span>
+                <input type="file" accept="image/*" class="hidden" id="storeImageInput">
+            </label>
 
-    saveOrders();
-}
-
-function renderOrders(): void {
-    if (!userOrdersContainer) return;
-    normalizeOrderNumbers();
-
-    userOrdersContainer.querySelectorAll('.order-card').forEach(card => card.remove());
-
-    if (emptyOrdersNotice) {
-        emptyOrdersNotice.innerHTML = `
-            <div>
-                <i class="ri-inbox-archive-line text-3xl mb-2 opacity-40 text-gh-gold"></i>
-                <p class="text-xs font-normal">No orders yet.</p>
+            <!-- Store Details -->
+            <div id="storeNameContainer" class="flex-1 w-full">
+                <label id="lblStoreName" for="storeNameInput"
+                    class="block text-xs tracking-[0.25em] text-gh-gold mb-2 uppercase" data-i18n="seller.store_name">
+                    Store Name
+                </label>
+                <input id="storeNameInput" type="text" value="Lina Atelier"
+                    class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-3 text-lg font-display tracking-wide outline-none focus:border-gh-gold">
             </div>
-        `;
-    }
 
-    if (userOrders.length === 0) {
-        emptyOrdersNotice?.classList.remove('hidden');
-    } else {
-        emptyOrdersNotice?.classList.add('hidden');
-        const ordersHTML = [...userOrders]
-            .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))
-            .map(order => renderOrderTemplate(order))
-            .join('');
-        userOrdersContainer.insertAdjacentHTML('beforeend', ordersHTML);
-    }
-
-    if (ordersCountBadge) {
-        ordersCountBadge.textContent = `${userOrders.length} Order${userOrders.length === 1 ? '' : 's'}`;
-    }
-}
-
-function showPurchaseMessage(message: string, isError = true): void {
-    if (!btnCheckout) return;
-
-    let messageElement = document.getElementById('purchaseStatusMessage') as HTMLElement | null;
-    if (!messageElement) {
-        messageElement = document.createElement('p');
-        messageElement.id = 'purchaseStatusMessage';
-        messageElement.className = 'text-[11px] mt-2';
-        btnCheckout.parentElement?.appendChild(messageElement);
-    }
-
-    messageElement.textContent = message;
-    messageElement.classList.toggle('text-red-400', isError);
-    messageElement.classList.toggle('text-gh-gold', !isError);
-}
-
-function completePurchase(): boolean {
-    if (ibuy.length === 0) {
-        showPurchaseMessage('Your cart is empty.');
-        return false;
-    }
-
-    const purchaseItems = ibuy.map(item => ({ ...item, quantity: Math.max(1, Number(item.quantity) || 1) }));
-    const unavailableProduct = purchaseItems.find(item => {
-        const product = globalProductsList.find(entry => String(entry.id) === String(item.id));
-        return !product || item.quantity! > Math.max(0, product.stock);
-    });
-
-    if (unavailableProduct) {
-        showPurchaseMessage('Some requested quantities are no longer available. The cart was updated.');
-        const product = globalProductsList.find(entry => String(entry.id) === String(unavailableProduct.id));
-        if (product) {
-            const cartItem = ibuy.find(item => String(item.id) === String(product.id));
-            if (cartItem) cartItem.quantity = Math.min(cartItem.quantity || 1, Math.max(0, product.stock));
-            if (product.stock <= 0) ibuy = ibuy.filter(item => String(item.id) !== String(product.id));
-            saveCart();
-            filtersuggestions(globalProductsList);
-            addtocart();
-        }
-        return false;
-    }
-
-    const createdAt = Date.now();
-    const order = createOrderRecord(purchaseItems, createdAt);
-
-    // Create the order record first, then reduce stock with no rollback after success.
-    purchaseItems.forEach(item => {
-        const product = globalProductsList.find(entry => String(entry.id) === String(item.id));
-        if (!product) return;
-
-        const stats = getProductStats(product);
-        stats.stock = Math.max(0, stats.stock - (item.quantity || 1));
-        stats.purchasesCount += 1;
-        applyProductStats(product);
-    });
-
-    userOrders.unshift(order);
-    ibuy = [];
-    saveOrders();
-    saveCart();
-    saveProductStats();
-
-    filtersuggestions(globalProductsList);
-    addtocart();
-    renderWishlist();
-    renderOrders();
-    updateMainProductMetrics();
-    syncMainProductStates();
-    syncWishlistButtonStates();
-    // The success state is shown in the order header, not in the cart.
-    return true;
-}
-
-function printOrder(orderId: string): void {
-    const order = userOrders.find(entry => entry.id === orderId);
-    if (!order) return;
-
-    document.querySelector('.market-print-invoice')?.remove();
-    document.getElementById('market-print-style')?.remove();
-    document.body.classList.remove('printing-market-order');
-
-    const rows = order.products.map(product => `
-        <tr>
-            <td class="product-cell"><img src="${product.image ? escapeHTML(product.image) : 'https://via.placeholder.com/56'}" alt="${escapeHTML(product.title)}"></td>
-            <td>${escapeHTML(product.title)}</td>
-            <td>${product.quantity}</td>
-            <td>${product.unitPrice.toFixed(2)} ${escapeHTML(order.currency)}</td>
-            <td>${product.itemTotalPrice.toFixed(2)} ${escapeHTML(order.currency)}</td>
-        </tr>
-    `).join('');
-
-    const printStyle = document.createElement('style');
-    printStyle.id = 'market-print-style';
-    printStyle.textContent = `
-        @media screen { .market-print-invoice { display: none !important; } }
-        @media print {
-            body.printing-market-order > *:not(.market-print-invoice) { display: none !important; }
-            body.printing-market-order { margin: 0 !important; padding: 0 !important; background: #fff !important; }
-            body.printing-market-order .market-print-invoice { display: block !important; }
-            .market-print-invoice, .market-print-invoice * { box-sizing: border-box; }
-            .market-print-invoice { display: block; width: 100%; max-width: 760px; margin: 0 auto; padding: 28px; background: #fff; color: #171717; font-family: Arial, Helvetica, sans-serif; }
-            .market-print-invoice .brand { border-bottom: 2px solid #caa84e; padding-bottom: 18px; margin-bottom: 22px; }
-            .market-print-invoice .brand-name { color: #171717; font-size: 20px; letter-spacing: 3px; font-weight: 700; }
-            .market-print-invoice .meta { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 20px; font-size: 13px; }
-            .market-print-invoice table { width: 100%; border-collapse: collapse; font-size: 13px; }
-            .market-print-invoice th { text-align: left; background: #f8f3e5; color: #765b16; padding: 10px; }
-            .market-print-invoice td { padding: 10px; border-bottom: 1px solid #e6d8ac; vertical-align: middle; }
-            .market-print-invoice .product-cell { width: 58px; }
-            .market-print-invoice .product-cell img { width: 42px; height: 42px; object-fit: cover; border-radius: 7px; }
-            .market-print-invoice .summary { display: flex; justify-content: space-between; border-top: 2px solid #caa84e; margin-top: 18px; padding-top: 14px; font-weight: 700; }
-            .market-print-invoice .note { margin-top: 22px; color: #765b16; font-size: 12px; text-align: center; }
-            @page { margin: 12mm; size: auto; }
-        }
-    `;
-
-    const printInvoice = document.createElement('section');
-    printInvoice.className = 'market-print-invoice';
-    printInvoice.setAttribute('aria-hidden', 'true');
-    printInvoice.innerHTML = `
-        <header class="brand"><div class="brand-name">GHALLAB SHOP</div></header>
-        <div class="meta"><span><strong>Order:</strong> ${order.orderNumber}</span><span><strong>Created at:</strong> ${escapeHTML(order.time)}</span></div>
-        <table>
-            <thead><tr><th>Image</th><th>Product</th><th>Quantity</th><th>Unit Price</th><th>Total</th></tr></thead>
-            <tbody>${rows}</tbody>
-        </table>
-        <div class="summary"><span>Total Quantity: ${order.totalQuantity}</span><span>Total: ${order.totalPrice.toFixed(2)} ${escapeHTML(order.currency)}</span></div>
-        <div class="note">This order is final and cannot be returned.</div>
-    `;
-
-    document.head.appendChild(printStyle);
-    document.body.appendChild(printInvoice);
-    document.body.classList.add('printing-market-order');
-
-    let cleaned = false;
-    const cleanup = (): void => {
-        if (cleaned) return;
-        cleaned = true;
-        document.body.classList.remove('printing-market-order');
-        printInvoice.remove();
-        printStyle.remove();
-        window.removeEventListener('afterprint', cleanup);
-    };
-
-    window.addEventListener('afterprint', cleanup, { once: true });
-    window.setTimeout(cleanup, 30000);
-
-    // Called directly from the user click for better mobile browser compatibility.
-    window.print();
-}
-
-function handleOrderRatingClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement;
-
-    const printButton = target.closest<HTMLButtonElement>('[data-print-order]');
-    if (printButton) {
-        const orderId = printButton.getAttribute('data-print-order');
-        if (orderId) printOrder(orderId);
-        return;
-    }
-
-    const button = target.closest<HTMLButtonElement>('[data-rating-action]');
-    if (!button) return;
-
-    const productId = button.getAttribute('data-product-id');
-    const action = button.getAttribute('data-rating-action');
-    if (!productId || (action !== 'increase' && action !== 'decrease')) return;
-
-    const currentRating = getCurrentAccountRating(productId);
-    const nextRating = action === 'increase'
-        ? Math.min(5, currentRating + 1)
-        : Math.max(0, currentRating - 1);
-
-    updateProductRating(productId, nextRating);
-}
-
-if (userOrdersContainer) {
-    userOrdersContainer.addEventListener('click', (event: MouseEvent) => {
-        const target = event.target as HTMLElement;
-        if (target.closest('[data-rating-action]') || target.closest('[data-print-order]')) {
-            handleOrderRatingClick(event);
-            return;
-        }
-
-        const productId = target.closest('[data-product-id]')?.getAttribute('data-product-id');
-        if (productId) scrollToProductCard(productId);
-    });
-}
-
-if (btnCheckout) {
-    // Convert the existing HTML button into a purchase-only button.
-    btnCheckout.querySelector('i')?.remove();
-    btnCheckout.textContent = 'Buy';
-    btnCheckout.addEventListener('click', () => {
-        completePurchase();
-    });
-}
-
-// ==========================================
-// WISHLIST RENDERING
-// ==========================================
-function createWishlistItemHTML(item: WishlistItem): string {
-    const title = item.title || 'Untitled Product';
-    const originalPrice = typeof item.price === 'number' ? item.price : parseFloat(String(item.price)) || 0;
-    const discount = item.discount;
-    const discountedPrice = discount ? calculateDiscountedPrice(originalPrice, discount) : originalPrice;
-    const hasDiscount = !!discount;
-    const image = item.img || 'https://via.placeholder.com/150';
-    const inCart = isProductInCart(item.id);
-
-    return `
-        <div class="wishlist-item product-click-trigger group relative bg-[var(--bg-card)] border border-gh-line rounded-xl p-3 flex flex-col justify-between transition-all hover:border-gh-gold/50 w-44 sm:w-52 shrink-0 snap-start" data-id="${item.id}" data-product-id="${item.id}">
-            <div class="w-full aspect-square rounded-lg overflow-hidden bg-black/10 mb-2 cursor-pointer" data-product-id="${item.id}">
-                <img src="${image}" alt="${title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
-            </div>
-            <div class="w-full flex flex-col flex-grow justify-between">
-                <div class="w-full text-center mb-2 cursor-pointer" data-product-id="${item.id}">
-                    <h4 class="text-xs font-medium text-[var(--text)] line-clamp-1" title="${title}">${title}</h4>
-                    <div class="mt-1 flex flex-col items-center gap-0.5">
-                        ${hasDiscount
-            ? `<span class="text-xs text-gray-500 line-through">${formatPrice(originalPrice)}</span>
-                               <span class="text-xs font-semibold text-gh-gold">${formatPrice(discountedPrice)}</span>
-                               <span class="text-[10px] text-red-400 bg-red-400/10 rounded-full px-1.5 py-0.5 leading-none">${discount}</span>`
-            : `<span class="text-xs font-semibold text-gh-gold">${formatPrice(discountedPrice)}</span>`
-        }
-                    </div>
-                </div>
-                <div class="w-full flex items-center gap-1.5 mt-auto">
-                    <button type="button" data-product-id="${item.id}" class="btn-wish-add-cart flex-1 py-1.5 px-2 text-[11px] font-medium rounded-lg transition-colors text-center ${inCart ? 'opacity-50 cursor-not-allowed bg-gray-600 text-white border border-gray-600' : 'bg-gh-gold/10 text-gh-gold border border-gh-gold/30 hover:bg-gh-gold hover:text-black'}" title="Add to Cart" ${inCart ? 'disabled' : ''}>
-                        ${inCart ? 'Added ✓' : 'Add to Cart'}
-                    </button>
-                    <button type="button" class="btn-wish-remove p-1.5 text-xs border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors flex items-center justify-center shrink-0" title="Remove from Wishlist">
-                        <i class="ri-delete-bin-line text-sm leading-none pointer-events-none"></i>
-                    </button>
+            <!-- Store Statistics -->
+            <div id="sellerStatsContainer" class="flex gap-8 shrink-0 text-center">
+                <div id="sellerProductStatBox">
+                    <p class="font-display text-2xl gold-grad" id="sellerProductCount">4</p>
+                    <p class="text-[10px] tracking-[0.2em] text-[var(--text-dim)] mt-1 uppercase"
+                        data-i18n="seller.listed_products_count">
+                        Listed Products
+                    </p>
                 </div>
             </div>
         </div>
-    `;
-}
 
-function renderWishlist(): void {
-    if (!wishGrid || !wishlistEmptyMsg) return;
-
-    // Out-of-stock products stay in the main catalog but never remain in the wishlist.
-    if (globalProductsList.length > 0) {
-        const availableWishlistItems = wishlistItems.filter(item => {
-            const product = globalProductsList.find(entry => String(entry.id) === String(item.id));
-            return !product || getProductStats(product).stock > 0;
-        });
-        if (availableWishlistItems.length !== wishlistItems.length) {
-            wishlistItems = availableWishlistItems;
-            saveWishlist();
-        }
-    }
-
-    if (wishlistItems.length === 0) {
-        wishlistEmptyMsg.classList.remove('hidden');
-        wishGrid.innerHTML = '';
-    } else {
-        wishlistEmptyMsg.classList.add('hidden');
-        wishGrid.innerHTML = wishlistItems.map(item => createWishlistItemHTML(item)).join('');
-    }
-
-    syncWishlistButtonStates();
-    syncMainProductStates();
-
-    if (wishBadge) wishBadge.textContent = String(wishlistItems.length);
-}
-
-// ==========================================
-// CART HTML BUILDER (Fixed Responsive Layout)
-// ==========================================
-function createCartItemHTML(item: CartItem | SuggestionItem): string {
-    const title = item.nameAr || item.nameEn || item.title || 'Untitled Product';
-    const image = item.img || 'https://via.placeholder.com/80';
-    const rating = item.rating || '0';
-    const isCartItem = 'quantity' in item && item.quantity !== undefined;
-
-    const originalPrice = item.originalPrice;
-    const discount = item.discount;
-    const currentPrice = typeof item.price === 'number' ? item.price : parseFloat(String(item.price)) || 0;
-    const hasDiscount = !!discount;
-
-    const displayPrice = isCartItem ? currentPrice * (item.quantity || 1) : currentPrice;
-    const isSuggestion = !isCartItem;
-
-    const cardWidthClass = isSuggestion
-        ? 'w-[150px] sm:w-[180px] shrink-0 snap-start'
-        : 'w-full max-w-full';
-
-    const centerClasses = isSuggestion ? 'text-center items-center justify-center' : '';
-
-    const contentLayoutClasses = isSuggestion
-        ? 'flex flex-col items-center gap-2 w-full text-center'
-        : 'flex flex-row items-start gap-2 sm:gap-3 w-full min-w-0 max-w-full';
-
-    const actionRowClasses = isSuggestion
-        ? 'flex items-center gap-2 w-full justify-center mt-auto pt-2'
-        : 'flex flex-row items-center justify-between gap-2 w-full mt-2 pt-2 border-t border-gh-line/30 shrink-0';
-
-    return `
-        <div class="cart-item product-click-trigger bg-[var(--bg-surface)] border border-gh-line rounded-lg p-2.5 flex flex-col justify-between transition-all hover:border-gh-gold/50 box-border overflow-hidden ${cardWidthClass} ${isSuggestion ? 'suggestion-item' : ''}" data-id="${item.id}" data-product-id="${item.id}" style="box-sizing: border-box;">
-            <!-- Top row: image + details -->
-            <div class="${contentLayoutClasses}" style="box-sizing: border-box;">
-                <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-black/10 shrink-0 cursor-pointer" data-product-id="${item.id}">
-                    <img src="${image}" alt="${title}" class="w-full h-full object-cover" loading="lazy">
-                </div>
-                <div class="flex flex-col justify-center flex-1 min-w-0 max-w-full overflow-hidden cursor-pointer ${centerClasses}" data-product-id="${item.id}">
-                    <h4 class="text-xs sm:text-sm font-medium text-[var(--text-main)] mb-0.5 leading-snug truncate w-full" title="${title}">${title}</h4>
-                    <div class="flex items-center gap-1 mb-0.5 ${isSuggestion ? 'justify-center' : 'justify-start'}">
-                        <span class="text-[10px] sm:text-xs text-yellow-500">★</span>
-                        <span class="text-[10px] sm:text-xs text-[var(--text-dim)]">${rating}</span>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-1 ${isSuggestion ? 'justify-center' : 'justify-start'}">
-                        ${hasDiscount
-            ? `<span class="text-[10px] text-gray-500 line-through">${formatPrice(originalPrice! * (isCartItem ? (item.quantity || 1) : 1))}</span>
-                               <span class="text-xs font-semibold text-gh-gold">${formatPrice(displayPrice)}</span>
-                               <span class="text-[9px] text-red-400 bg-red-400/10 rounded-full px-1 py-0.5 leading-none">${discount}</span>`
-            : `<span class="text-xs font-semibold text-gh-gold">${formatPrice(displayPrice)}</span>`
-        }
-                    </div>
-                </div>
+        <!-- Seller Products Section -->
+        <div id="sellerProductsSection" class="mb-14">
+            <div id="sellerProductsHeader" class="flex items-center justify-between mb-6">
+                <h3 id="sellerProductsTitle" class="font-display text-xl tracking-[0.06em]"
+                    data-i18n="seller.my_listed_products">
+                    My Listed Products
+                </h3>
             </div>
-            <!-- Action buttons -->
-            <div class="${actionRowClasses}">
-                ${isCartItem ? `
-                    <div class="qty-stepper flex items-center border border-gh-line rounded-full overflow-hidden shrink-0 bg-black/5">
-                        <button type="button" data-action="decrease" data-id="${item.id}" class="qty-decrement-btn w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-[var(--text-dim)] hover:text-gh-gold transition-colors focus:outline-none" aria-label="Decrease Quantity">−</button>
-                        <input type="number" class="qty-input w-6 sm:w-7 text-center bg-transparent focus:outline-none text-xs font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" value="${item.quantity}" min="1" readonly>
-                        <button type="button" data-action="increase" data-id="${item.id}" class="qty-increment-btn w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-[var(--text-dim)] hover:text-gh-gold transition-colors focus:outline-none" aria-label="Increase Quantity">+</button>
-                    </div>
-                    <button type="button" data-action="remove" data-id="${item.id}" class="p-1.5 text-xs border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-full transition-colors flex items-center justify-center shrink-0" title="Remove Item">
-                        <i class="ri-delete-bin-line text-xs sm:text-sm"></i>
-                    </button>
-                ` : `
-                    <button type="button" data-action="add-to-cart" data-id="${item.id}" class="btn-add-to-cart-suggestion w-full py-1.5 px-2 text-[11px] bg-gh-gold/10 text-gh-gold border border-gh-gold/30 hover:bg-gh-gold hover:text-black font-medium rounded-full transition-colors text-center whitespace-nowrap" title="Add to Cart">
-                        Add to Cart
-                    </button>
-                `}
+
+            <!-- Horizontal scrollable product track with snap alignment -->
+            <div id="sellerGrid"
+                class="flex items-stretch gap-6 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gh-gold/40 scrollbar-track-transparent">
             </div>
         </div>
-    `;
-}
 
-// ==========================================
-// CART & SUGGESTIONS LOGIC
-// ==========================================
-function addtocart(): void {
-    if (!cartItemsList || !cartEmptyMsg || !cartBadge || !cartSuggestions || !suggestionmasg || !cartTotalValue) return;
+        <!-- Add New Product Form -->
+        <div id="addProductPanel" class="border border-gh-line rounded-2xl p-6 md:p-8 bg-[var(--panel)]">
+            <p id="addProductTitle" class="font-display text-sm tracking-[0.2em] text-gh-gold mb-6 uppercase"
+                data-i18n="seller.add_new_product">
+                Add New Product
+            </p>
 
-    cartItemsList.innerHTML = '';
-    cartSuggestions.innerHTML = '';
+            <div id="addProductFormGrid" class="grid md:grid-cols-2 gap-6">
+                <!-- Product Title -->
+                <div id="fieldProductName">
+                    <label id="lblProductName" for="newProductName"
+                        class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide"
+                        data-i18n="seller.product_title">
+                        Product Title
+                    </label>
+                    <input id="newProductName" type="text" placeholder="e.g. Hand-Embroidered Abaya"
+                        data-i18n-placeholder="seller.product_title_placeholder"
+                        class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gh-gold">
+                </div>
 
-    if (ibuy.length === 0) {
-        cartEmptyMsg.classList.remove('hidden');
-        suggestionmasg.classList.add('hidden');
-        cartTotalValue.textContent = '0.00';
-    } else {
-        cartEmptyMsg.classList.add('hidden');
+                <!-- Product Category -->
+                <div id="fieldProductCategory">
+                    <label id="lblProductCategory" for="newProductCategory"
+                        class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide"
+                        data-i18n="seller.product_category">
+                        Category
+                    </label>
+                    <select id="newProductCategory"
+                        class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gh-gold text-[var(--text-main)] [&>option]:bg-[var(--panel)] [&>option]:text-[var(--text-main)] cursor-pointer">
+                        <option value="" disabled selected data-i18n="seller.select_category">Select Category</option>
+                        <option value="dresses">Dresses / فساتين</option>
+                        <option value="trousers">Trousers / سراويل</option>
+                        <option value="blouses">Blouses / بلوزات</option>
+                        <option value="shirts">Shirts / قمصان</option>
+                        <option value="skirts">Skirts / تنانير</option>
+                    </select>
+                </div>
 
-        ibuy.forEach(item => {
-            cartItemsList.insertAdjacentHTML('beforeend', createCartItemHTML(item));
-        });
+                <!-- Product Image Upload -->
+                <div id="fieldProductImage" class="md:col-span-2">
+                    <label id="lblProductImage" class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide"
+                        data-i18n="seller.product_image">
+                        Product Image
+                    </label>
 
-        suggestions.forEach(item => {
-            cartSuggestions.insertAdjacentHTML('beforeend', createCartItemHTML(item));
-        });
+                    <label id="newProductImgUploadLabel" for="newProductImgInput"
+                        class="relative flex items-center justify-between gap-3 border border-dashed border-gh-line rounded-lg px-4 py-2.5 cursor-pointer hover:border-gh-gold transition-colors overflow-hidden min-h-[46px]">
 
-        // Issue 5: Hide suggestions container if empty
-        if (suggestions.length > 0) {
-            suggestionmasg.classList.remove('hidden');
-        } else {
-            suggestionmasg.classList.add('hidden');
-        }
+                        <!-- Placeholder State (Before Upload) -->
+                        <div id="productImgPlaceholder" class="flex items-center gap-3">
+                            <i id="newProductImgIcon" class="ri-image-add-line text-gh-gold text-lg shrink-0"></i>
+                            <span id="newProductImgLabel" class="text-sm text-[var(--text-dim)] truncate"
+                                data-i18n="seller.upload_image">
+                                Upload Image
+                            </span>
+                        </div>
 
-        // Total uses discounted price × quantity
-        const total = ibuy.reduce((sum, item) => {
-            const unit = typeof item.price === 'number' ? item.price : Number.parseFloat(String(item.price)) || 0;
-            return sum + unit * (item.quantity || 1);
-        }, 0);
+                        <div id="productImgPreviewWrapper" class="hidden gap-3 w-full justify-between">
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                <img id="newProductImgPreview"
+                                    class="w-8 h-8 rounded object-cover border border-gh-line shrink-0" src=""
+                                    alt="Product Preview">
+                                <span id="newProductImgName"
+                                    class="text-xs text-gh-gold font-medium truncate max-w-[180px]"></span>
+                            </div>
 
-        cartTotalValue.textContent = total.toFixed(2);
-    }
+                            <button type="button" id="btnRemoveProductImg"
+                                class="text-[var(--text-dim)] hover:text-red-400 transition-colors p-1 shrink-0">
+                                <i class="ri-close-circle-line text-lg"></i>
+                            </button>
+                        </div>
 
-    cartBadge.textContent = String(ibuy.length);
-    syncMainProductStates();
-    syncWishlistButtonStates(); // Also sync wishlist buttons when cart changes
-}
+                        <input id="newProductImgInput" type="file" accept="image/png, image/jpeg, image/webp"
+                            class="hidden">
+                    </label>
+                </div>
 
-function createSuggestionItem(product: Product): SuggestionItem {
-    const suggestion: SuggestionItem = {
-        id: product.id,
-        title: product.nameAr,
-        price: product.price,
-        img: product.image,
-        nameAr: product.nameAr,
-        categoryEn: product.categoryEn,
-        rating: product.rating,
-        ...(product.discount !== undefined ? { discount: product.discount } : {}),
-        ...(product.oldPrice !== undefined ? { originalPrice: product.oldPrice } : {}),
-    };
-    if (product.nameEn) suggestion.nameEn = product.nameEn;
-    return suggestion;
-}
+                <!-- Price -->
+                <div id="fieldProductPrice">
+                    <label id="lblProductPrice" for="newProductPrice"
+                        class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide" data-i18n="seller.price_sar">
+                        Price (SAR)
+                    </label>
+                    <input id="newProductPrice" type="number" placeholder="0.00" min="0" step="0.01"
+                        class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gh-gold">
+                </div>
 
-function filtersuggestions(allProducts: Product[]): void {
-    const cartCategoryNames = ibuy.map(item => item.categoryEn || 'General');
-    const matchedProducts: Product[] = allProducts.filter(product => {
-        const matchesCategory = cartCategoryNames.includes(product.categoryEn);
-        const isAlreadyInCart = ibuy.some(item => String(item.id) === String(product.id));
-        const isAvailable = Math.max(0, Number(product.stock) || 0) > 0;
-        return matchesCategory && !isAlreadyInCart && isAvailable;
-    });
+                <!-- Discount -->
+                <div id="fieldProductDiscount">
+                    <label id="lblProductDiscount" for="newProductDiscount"
+                        class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide"
+                        data-i18n="seller.discount_percentage">
+                        Discount (%)
+                    </label>
+                    <input id="newProductDiscount" type="number" placeholder="e.g. 5" min="0" max="100"
+                        data-i18n-placeholder="seller.discount_placeholder"
+                        class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gh-gold">
+                </div>
 
-    // Sort by rating descending
-    matchedProducts.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+                <!-- Quantity -->
+                <div id="fieldProductQuantity" class="md:col-span-2">
+                    <label id="lblProductQty" for="newProductQty"
+                        class="block text-xs text-[var(--text-dim)] mb-2 tracking-wide"
+                        data-i18n="seller.available_quantity">
+                        Available Quantity
+                    </label>
+                    <input id="newProductQty" type="number" placeholder="0" min="0"
+                        class="w-full bg-transparent border border-gh-line rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gh-gold">
+                </div>
+            </div>
 
-    // Unlimited suggestions (no slice)
-    suggestions = matchedProducts.map(createSuggestionItem);
-}
+            <!-- Form Error & Submit -->
+            <p id="newProductError" class="hidden text-xs text-red-400 mt-4"></p>
+            <button id="btnAddProduct"
+                class="btn-gold mt-7 font-display text-xs tracking-[0.2em] rounded-full px-8 py-3 uppercase"
+                data-i18n="seller.publish_product">
+                Publish Product
+            </button>
+        </div>
+    </section>
+    <!-- ============ FOOTER ============ -->
+    <footer id="mainFooter" class="relative bg-black pt-16 pb-8 px-6">
+        <div id="footerTopDivider" class="hairline max-w-7xl mx-auto mb-12"></div>
 
-// Adds product to cart. If already in cart, increments quantity unless an explicit input is given.
-function addToCart(product: Product, quantityInput: HTMLInputElement | null, allProducts: Product[]): void {
-    const existingItem = ibuy.find(item => String(item.id) === String(product.id));
-    const maxAllowed = Math.max(0, Number(product.stock) || 0);
-    if (maxAllowed === 0) {
-        ibuy = ibuy.filter(item => String(item.id) !== String(product.id));
-        saveCart();
-        filtersuggestions(allProducts);
-        addtocart();
-        syncMainProductStates();
-        return;
-    }
+        <div id="footerGrid" class="max-w-7xl mx-auto grid gap-10 md:grid-cols-4 text-center lg:text-left">
+            <!-- Brand Info -->
+            <div id="footerBrandCol" class="md:col-span-2 flex flex-col items-center lg:items-start">
+                <div id="footerBrandHeader" class="flex items-center gap-3 mb-4">
+                    <i id="footerBrandLogoIcon" class="ri-flower-fill text-gh-gold text-2xl"></i>
+                    <span id="footerBrandName" class="font-display tracking-[0.2em] text-base text-gh-cream">GHALLAB
+                        SHOP</span>
+                </div>
+                <p id="footerBrandDesc" class="text-sm text-[rgba(247,244,236,0.62)] max-w-sm leading-relaxed"
+                    data-i18n="footer.about_text">
+                    A curated marketplace connecting trusted sellers with discerning buyers.
+                </p>
+                <div id="footerSeal" class="seal mt-6">
+                    <span id="footerSealText"
+                        class="font-display text-[10px] tracking-[0.2em] text-gh-gold/80 text-center leading-tight">
+                        <i id="footerSealIcon" class="ri-flower-fill text-gh-gold text-lg"></i><br>2014
+                    </span>
+                </div>
+            </div>
 
-    let qty = quantityInput
-        ? Math.max(1, Number(quantityInput.value) || 1)
-        : existingItem
-            ? (existingItem.quantity || 1) + 1
-            : 1;
+            <!-- Store Navigation Links -->
+            <div id="footerNavStore">
+                <h4 id="footerHeaderShop" class="text-xs tracking-[0.25em] text-gh-gold mb-4 uppercase"
+                    data-i18n="footer.shop_header">
+                    Shop
+                </h4>
+                <ul id="footerListShop" class="space-y-2.5 text-sm text-[rgba(247,244,236,0.62)]">
+                    <li data-i18n="footer.new_arrivals">New Arrivals</li>
+                    <li data-i18n="footer.women">Women</li>
+                    <li data-i18n="footer.men">Men</li>
+                    <li data-i18n="footer.accessories">Accessories</li>
+                </ul>
+            </div>
 
-    // Enforce stock limit in all cart entry paths
-    qty = Math.min(qty, maxAllowed);
+            <!-- Customer Service Links -->
+            <div id="footerNavSupport">
+                <h4 id="footerHeaderSupport" class="text-xs tracking-[0.25em] text-gh-gold mb-4 uppercase"
+                    data-i18n="footer.support_header">
+                    Customer Care
+                </h4>
+                <ul id="footerListSupport" class="space-y-2.5 text-sm text-[rgba(247,244,236,0.62)]">
+                    <li data-i18n="footer.shipping_returns">Shipping & Returns</li>
+                    <li data-i18n="footer.size_guide">Size Guide</li>
+                    <li data-i18n="footer.contact_us">Contact Us</li>
+                </ul>
+            </div>
+        </div>
 
-    const discountedPrice = calculateDiscountedPrice(product.price, product.discount);
+        <div id="footerBottomDivider" class="hairline max-w-7xl mx-auto my-8"></div>
+        <p id="footerCopyright" class="text-center text-xs text-[rgba(247,244,236,0.62)]" data-i18n="footer.copyright">
+            © 2026 Ghallab Shop. All rights reserved.
+        </p>
+    </footer>
 
-    if (existingItem) {
-        existingItem.quantity = qty;
-        existingItem.price = discountedPrice;
-        existingItem.discount = product.discount;
-        existingItem.originalPrice = product.oldPrice;
-        existingItem.stock = product.stock;
-    } else {
-        const newCartItem: CartItem = {
-            id: product.id,
-            nameAr: product.nameAr,
-            price: discountedPrice,
-            quantity: qty,
-            categoryEn: product.categoryEn,
-            rating: product.rating,
-            stock: product.stock,
-            ...(product.discount !== undefined ? { discount: product.discount } : {}),
-            ...(product.oldPrice !== undefined ? { originalPrice: product.oldPrice } : {}),
-        };
-        if (product.nameEn) newCartItem.nameEn = product.nameEn;
-        if (product.image) newCartItem.img = product.image;
-        ibuy.push(newCartItem);
-    }
+    <script type="module" src="../js/TheMarket.js"></script>
+    <script type="module" src="../js/setting.js"></script>
+</body>
 
-    saveCart();
-    filtersuggestions(allProducts);
-    addtocart();
-    syncMainProductStates();
-    syncWishlistButtonStates();
-}
-
-function addToCartFromSuggestion(item: SuggestionItem): void {
-    const product = globalProductsList.find(p => String(p.id) === String(item.id));
-    if (product) {
-        addToCart(product, null, globalProductsList);
-        return;
-    }
-
-    // Fallback: build cart item manually
-    const existingItem = ibuy.find(i => String(i.id) === String(item.id));
-    if (existingItem) {
-        const maxAllowed = Math.max(1, Number(existingItem.stock) || 1);
-        existingItem.quantity = Math.min(Math.max(1, (existingItem.quantity || 1) + 1), maxAllowed);
-        existingItem.stock = maxAllowed;
-    } else {
-        const newCartItem: CartItem = {
-            id: item.id,
-            nameAr: item.nameAr || item.title || 'Product',
-            price: typeof item.price === 'number' ? item.price : Number.parseFloat(String(item.price)) || 0,
-            quantity: 1,
-            categoryEn: item.categoryEn || 'General',
-            rating: item.rating || '0',
-            stock: Math.max(1, Number((item as SuggestionItem).quantity) || 1),
-            ...(item.originalPrice !== undefined ? { originalPrice: item.originalPrice } : {}),
-            ...(item.discount !== undefined ? { discount: item.discount } : {}),
-        };
-        if (item.img) newCartItem.img = item.img;
-        if (item.nameEn) newCartItem.nameEn = item.nameEn;
-        ibuy.push(newCartItem);
-    }
-
-    saveCart();
-    filtersuggestions(globalProductsList);
-    addtocart();
-    syncMainProductStates();
-    syncWishlistButtonStates();
-}
-
-// ==========================================
-// FETCH & RENDER PRODUCTS
-// ==========================================
-if (productTemplate && productGrid) {
-    fetch('/products.json')
-        .then(response => response.json())
-        .then((products: Product[]) => {
-            globalProductsList = products.map(product => ({ ...product }));
-            persistProductStatsToLoadedProducts();
-            // Sort by rating descending by default.
-            globalProductsList.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
-            productGrid.innerHTML = '';
-            globalProductsList.forEach(product => {
-                const clone = productTemplate.content.cloneNode(true) as DocumentFragment;
-
-                const title = clone.querySelector('.product-title') as HTMLElement;
-                const price = clone.querySelector('.product-price') as HTMLElement;
-                const oldPrice = clone.querySelector('.product-old-price') as HTMLElement;
-                const discount = clone.querySelector('.product-discount') as HTMLElement;
-                const rating = clone.querySelector('.product-rating') as HTMLElement;
-                const reviews = clone.querySelector('.product-reviews') as HTMLElement;
-                const purchases = clone.querySelector('.product-purchases') as HTMLElement;
-                const stock = clone.querySelector('.product-stock') as HTMLElement;
-                const cardArticle = clone.querySelector('.product-card') as HTMLElement;
-                const img = clone.querySelector('.product-image') as HTMLImageElement;
-                const desc = clone.querySelector('.product-description') as HTMLElement;
-
-                if (title) title.textContent = product.nameAr;
-                if (price) price.textContent = `${product.price.toFixed(2)} SAR`;
-                if (rating) rating.textContent = product.rating;
-                if (reviews) reviews.textContent = `(${product.reviewsCount})`;
-                if (purchases) purchases.textContent = String(product.purchasesCount);
-                if (stock) stock.textContent = String(product.stock);
-                if (img) {
-                    img.src = product.image;
-                    img.alt = product.nameAr;
-                }
-                if (desc) desc.textContent = product.descriptionAr;
-
-                if (oldPrice && product.oldPrice) {
-                    oldPrice.textContent = `${product.oldPrice.toFixed(2)} SAR`;
-                    oldPrice.classList.remove('hidden');
-                }
-                if (discount && product.discount) {
-                    discount.textContent = product.discount;
-                    discount.classList.remove('hidden');
-                }
-
-                // Quantity stepper controls
-                const decreaseQuantityBtn = clone.querySelector('.qty-decrement-btn') as HTMLButtonElement | null;
-                const quantityInput = clone.querySelector('.qty-input') as HTMLInputElement | null;
-                const increaseQuantityBtn = clone.querySelector('.qty-increment-btn') as HTMLButtonElement | null;
-
-                if (quantityInput) {
-                    productQuantityInputs.set(String(product.id), quantityInput);
-                }
-
-                if (decreaseQuantityBtn && quantityInput && increaseQuantityBtn) {
-                    decreaseQuantityBtn.addEventListener('click', () => {
-                        const currentVal = Number(quantityInput.value);
-                        if (currentVal > 1) {
-                            quantityInput.value = String(currentVal - 1);
-                            syncQuantityWithCart(product.id, currentVal - 1);
-                        }
-                    });
-
-                    increaseQuantityBtn.addEventListener('click', () => {
-                        const currentVal = Number(quantityInput.value);
-                        if (currentVal < product.stock) {
-                            quantityInput.value = String(currentVal + 1);
-                            syncQuantityWithCart(product.id, currentVal + 1);
-                        }
-                    });
-                }
-
-                // Wishlist toggle button
-                const wishlistToggleBtn = clone.querySelector('.btn-wishlist-toggle') as HTMLButtonElement;
-                const wishlistIcon = clone.querySelector('.wishlist-icon') as HTMLElement;
-
-                // Add to Cart button
-                const adding = clone.querySelector('.btn-add-to-cart') as HTMLButtonElement | null;
-
-                const isInCart = ibuy.some(item => String(item.id) === String(product.id));
-                if (isInCart) {
-                    if (adding) {
-                        adding.disabled = true;
-                        adding.textContent = 'In Cart ✓';
-                    }
-                    const cartItem = ibuy.find(item => String(item.id) === String(product.id));
-                    if (cartItem && quantityInput) {
-                        quantityInput.value = String(cartItem.quantity || 1);
-                    }
-                }
-
-                if (adding) {
-                    adding.addEventListener('click', () => {
-                        if (adding.disabled) return;
-                        addToCart(product, quantityInput, products);
-                    });
-                }
-
-                if (wishlistToggleBtn && wishlistIcon && wishBadge) {
-                    const isLiked = wishlistItems.some(item => String(item.id) === String(product.id));
-                    if (isLiked) {
-                        wishlistIcon.classList.replace('ri-poker-hearts-line', 'ri-poker-hearts-fill');
-                    }
-
-                    wishlistToggleBtn.addEventListener('click', () => {
-                        if (getProductStats(product).stock <= 0) return;
-
-                        const index = wishlistItems.findIndex(item => String(item.id) === String(product.id));
-
-                        if (index === -1) {
-                            const newWishlistItem: WishlistItem = {
-                                id: product.id,
-                                title: product.nameAr,
-                                price: product.price,
-                                img: product.image,
-                                ...(product.oldPrice !== undefined ? { originalPrice: product.oldPrice } : {}),
-                                ...(product.discount !== undefined ? { discount: product.discount } : {}),
-                            };
-                            wishlistItems.push(newWishlistItem);
-                        } else {
-                            wishlistItems.splice(index, 1);
-                        }
-
-                        saveWishlist();
-                        renderWishlist();
-                        syncMainProductStates();
-                    });
-                }
-
-                if (cardArticle) {
-                    cardArticle.setAttribute('data-id', String(product.id));
-                    cardArticle.addEventListener('click', (event: MouseEvent) => {
-                        const target = event.target as HTMLElement;
-                        if (target.closest('button') || target.closest('input')) return;
-                        scrollToProductCard(product.id);
-                    });
-                }
-                productGrid.appendChild(clone);
-            });
-
-            // Remove zero-stock items from the cart only; keep their original cards visible at quantity zero.
-            ibuy = ibuy.filter(item => {
-                const product = globalProductsList.find(entry => String(entry.id) === String(item.id));
-                return !product || getProductStats(product).stock > 0;
-            });
-            saveCart();
-            filtersuggestions(globalProductsList);
-            addtocart();
-            syncMainProductStates();
-            renderWishlist();
-            renderOrders();
-        })
-        .catch(error => {
-            console.error('Error fetching products:', error);
-        });
-}
-
-// ==========================================
-// GLOBAL EVENT DELEGATION - CART ACTIONS
-// ==========================================
-if (cartItemsList) {
-    cartItemsList.addEventListener('click', (event) => {
-        const target = event.target as HTMLElement;
-        const actionBtn = target.closest('[data-action]') as HTMLButtonElement | null;
-        const productId = target.closest('[data-product-id]')?.getAttribute('data-product-id');
-
-        if (actionBtn) {
-            const action = actionBtn.getAttribute('data-action');
-            const id = actionBtn.getAttribute('data-id');
-            if (!id) return;
-
-            if (action === 'remove') {
-                ibuy = ibuy.filter(item => String(item.id) !== id);
-                saveCart();
-                filtersuggestions(globalProductsList);
-                addtocart();
-                syncMainProductStates();
-                syncWishlistButtonStates();
-                const input = productQuantityInputs.get(String(id));
-                if (input) input.value = '1';
-            } else if (action === 'increase' || action === 'decrease') {
-                const item = ibuy.find(entry => String(entry.id) === id);
-                if (!item) return;
-
-                const product = globalProductsList.find(entry => String(entry.id) === String(id));
-                const stockLimit = product ? Math.max(0, Number(product.stock) || 0) : Math.max(0, Number(item.stock) || 0);
-                if (stockLimit === 0) {
-                    ibuy = ibuy.filter(entry => String(entry.id) !== id);
-                    saveCart();
-                    filtersuggestions(globalProductsList);
-                    addtocart();
-                    syncMainProductStates();
-                    updateProductQuantityInput(id, 0);
-                    return;
-                }
-                let nextQty = action === 'increase' ? (item.quantity || 1) + 1 : Math.max(1, (item.quantity || 1) - 1);
-
-                nextQty = Math.min(Math.max(1, nextQty), stockLimit);
-                item.quantity = nextQty;
-                item.stock = stockLimit;
-                saveCart();
-                filtersuggestions(globalProductsList);
-                addtocart();
-                syncMainProductStates();
-                syncWishlistButtonStates();
-                updateProductQuantityInput(id, nextQty);
-            }
-            return;
-        }
-
-        if (productId) {
-            scrollToProductCard(productId);
-        }
-    });
-}
-
-if (cartSuggestions) {
-    cartSuggestions.addEventListener('click', (event) => {
-        const target = event.target as HTMLElement;
-        const actionBtn = target.closest('[data-action="add-to-cart"]') as HTMLButtonElement | null;
-        const productId = target.closest('[data-product-id]')?.getAttribute('data-product-id');
-
-        if (actionBtn) {
-            const id = actionBtn.getAttribute('data-id');
-            if (!id || actionBtn.disabled) return;
-
-            const suggestionItem = suggestions.find(s => String(s.id) === id);
-            if (!suggestionItem) return;
-
-            actionBtn.disabled = true;
-            addToCartFromSuggestion(suggestionItem);
-            return;
-        }
-
-        if (productId) {
-            scrollToProductCard(productId);
-        }
-    });
-}
-
-// ==========================================
-// GLOBAL EVENT DELEGATION - WISHLIST ACTIONS
-// ==========================================
-if (wishGrid) {
-    wishGrid.addEventListener('click', (event: MouseEvent) => {
-        const target = event.target as HTMLElement;
-
-        const addToCartBtn = target.closest('.btn-wish-add-cart');
-        if (addToCartBtn) {
-            const itemCard = addToCartBtn.closest('.wishlist-item');
-            const itemId = itemCard?.getAttribute('data-id');
-            if (itemId) {
-                const product = globalProductsList.find(p => String(p.id) === String(itemId));
-                if (product) {
-                    // addToCart internally syncs wishlist button states
-                    addToCart(product, null, globalProductsList);
-                }
-            }
-            return;
-        }
-
-        const removeBtn = target.closest('.btn-wish-remove');
-        if (removeBtn) {
-            const itemCard = removeBtn.closest('.wishlist-item');
-            const itemId = itemCard?.getAttribute('data-id');
-            if (!itemId) return;
-
-            wishlistItems = wishlistItems.filter(item => String(item.id) !== String(itemId));
-            saveWishlist();
-            renderWishlist();
-            syncMainProductStates();
-            return;
-        }
-
-        const productId = target.closest('[data-product-id]')?.getAttribute('data-product-id');
-        if (productId) {
-            scrollToProductCard(productId);
-        }
-    });
-}
-
-// ==========================================
-// INITIAL RENDER (on DOM ready)
-// ==========================================
-function initialRender(): void {
-    renderOrders();
-    ibuy = ibuy.map(item => {
-        const product = globalProductsList.find(entry => String(entry.id) === String(item.id));
-        const maxAllowed = product ? Math.max(1, product.stock) : Math.max(1, Number(item.stock) || 1);
-        return {
-            ...item,
-            quantity: Math.min(Math.max(1, Number(item.quantity) || 1), maxAllowed),
-            stock: maxAllowed,
-        };
-    });
-
-    saveCart();
-    renderWishlist();
-    if (ibuy.length > 0 && cartItemsList && cartBadge && cartTotalValue) {
-        if (cartBadge) cartBadge.textContent = String(ibuy.length);
-    }
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initialRender);
-} else {
-    initialRender();
-}
+</html>
