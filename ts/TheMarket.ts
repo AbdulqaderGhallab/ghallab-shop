@@ -55,6 +55,34 @@ interface SuggestionItem {
     originalPrice?: number | undefined;
 }
 
+interface OrderProductSnapshot {
+    id: string | number;
+    title: string;
+    image?: string;
+    quantity: number;
+    unitPrice: number;
+    itemTotalPrice: number;
+}
+
+interface OrderRecord {
+    id: string;
+    orderNumber: number;
+    currency: string;
+    totalQuantity: number;
+    totalPrice: number;
+    time: string;
+    createdAt: number;
+    products: OrderProductSnapshot[];
+}
+
+interface ProductStats {
+    stock: number;
+    purchasesCount: number;
+    baseRating: number;
+    baseReviewsCount: number;
+    ratingsByAccount: Record<string, number>;
+}
+
 // ==========================================
 // HELPER FUNCTIONS
 // ==========================================
@@ -100,7 +128,8 @@ function isProductInWishlist(productId: string | number): boolean {
 }
 
 function scrollToProductCard(productId: string | number): void {
-    const card = document.querySelector(`.product-card[data-id="${String(productId)}"]`) as HTMLElement | null;
+    const card = Array.from(document.querySelectorAll<HTMLElement>('.product-card'))
+        .find(item => item.getAttribute('data-id') === String(productId));
     if (!card) return;
 
     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -110,35 +139,72 @@ function scrollToProductCard(productId: string | number): void {
     }, 1800);
 }
 
-function getStorageKey(featureName: string): string {
+function readLocalStorageJSON<T>(key: string, fallback: T): T {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+
+    try {
+        return JSON.parse(raw) as T;
+    } catch (error) {
+        console.error(`Invalid localStorage data for ${key}:`, error);
+        return fallback;
+    }
+}
+
+function getAccountIdentity(): string {
     const currentUserRaw = localStorage.getItem('currentUser');
     if (currentUserRaw) {
         try {
-            const user = JSON.parse(currentUserRaw);
-            if (user && user.email) {
-                return `${featureName}_${user.email}`;
-            }
+            const user = JSON.parse(currentUserRaw) as { email?: string; id?: string | number; username?: string; name?: string };
+            const identity = user?.email || user?.id || user?.username || user?.name;
+            if (identity) return String(identity).trim().toLowerCase();
         } catch (error) {
             console.error('Error parsing current user data:', error);
         }
     }
-    return `${featureName}_guest`;
+    return 'guest';
+}
+
+function getStorageKey(featureName: string): string {
+    return `${featureName}_${getAccountIdentity()}`;
+}
+
+function clamp(value: number, min: number, max: number): number {
+    return Math.min(max, Math.max(min, value));
+}
+
+function parseRating(value: unknown): number {
+    const parsed = Number.parseFloat(String(value ?? 0));
+    return Number.isFinite(parsed) ? clamp(parsed, 0, 5) : 0;
+}
+
+function escapeHTML(value: unknown): string {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
 // ==========================================
 // STATE INITIALIZATION FROM LOCALSTORAGE
 // ==========================================
 const lovesKey = getStorageKey('ilove');
-const savedLove = localStorage.getItem(lovesKey);
-let wishlistItems: WishlistItem[] = savedLove ? JSON.parse(savedLove) : [];
+let wishlistItems: WishlistItem[] = readLocalStorageJSON<WishlistItem[]>(lovesKey, []);
 
 const cartKey = getStorageKey('cart');
-const savedCart = localStorage.getItem(cartKey);
-let ibuy: CartItem[] = savedCart ? JSON.parse(savedCart) : [];
+let ibuy: CartItem[] = readLocalStorageJSON<CartItem[]>(cartKey, []);
+
+const ordersKey = getStorageKey('orders');
+let userOrders: OrderRecord[] = readLocalStorageJSON<OrderRecord[]>(ordersKey, []);
+
+const productStatsStorageKey = 'market_product_stats_v1';
+let productStats: Record<string, ProductStats> = readLocalStorageJSON<Record<string, ProductStats>>(productStatsStorageKey, {});
 let suggestions: SuggestionItem[] = [];
 
 let globalProductsList: Product[] = [];
-const productQuantityInputs = new Map<string | number, HTMLInputElement>();
+const productQuantityInputs = new Map<string, HTMLInputElement>();
 
 // ==========================================
 // DOM REFERENCES (for cart, wishlist, etc.)
@@ -151,12 +217,16 @@ const wishlistEmptyMsg = document.querySelector('#wishlistEmptyMsg') as HTMLElem
 
 const cartTotalLabel = document.getElementById('cartTotalLabel') as HTMLElement | null;
 const cartTotalValue = document.getElementById('cartTotalValue') as HTMLElement | null;
-const btnPrintInvoice = document.getElementById('btnPrintInvoice') as HTMLButtonElement | null; // left unchanged
+// Find the existing checkout button without attaching print logic.
+const btnCheckout = document.querySelector<HTMLButtonElement>('button[id^="btn"][id$="Invoice"]');
 const cartEmptyMsg = document.getElementById('cartEmptyMsg') as HTMLElement | null;
 const cartItemsList = document.getElementById('cartItemsList') as HTMLElement | null;
 const cartSuggestions = document.getElementById('cartSuggestions') as HTMLElement | null;
 const suggestionmasg = document.getElementById('cartSuggestionsTitle') as HTMLElement | null;
 const cartBadge = document.getElementById('cartBadge') as HTMLElement | null;
+const userOrdersContainer = document.getElementById('userOrdersContainer') as HTMLElement | null;
+const emptyOrdersNotice = document.getElementById('emptyOrdersNotice') as HTMLElement | null;
+const ordersCountBadge = document.getElementById('ordersCountBadge') as HTMLElement | null;
 
 // ==========================================
 // PERSISTENCE HELPERS
@@ -169,9 +239,134 @@ function saveCart(): void {
     localStorage.setItem(cartKey, JSON.stringify(ibuy));
 }
 
+function saveOrders(): void {
+    localStorage.setItem(ordersKey, JSON.stringify(userOrders));
+}
+
+function saveProductStats(): void {
+    localStorage.setItem(productStatsStorageKey, JSON.stringify(productStats));
+}
+
+function getProductStats(product: Product): ProductStats {
+    const id = String(product.id);
+    const existing = productStats[id];
+    const safeStats: ProductStats = {
+        stock: Math.max(0, Number(existing?.stock ?? product.stock) || 0),
+        purchasesCount: Math.max(0, Number(existing?.purchasesCount ?? product.purchasesCount) || 0),
+        baseRating: parseRating(existing?.baseRating ?? product.rating),
+        baseReviewsCount: Math.max(0, Number(existing?.baseReviewsCount ?? product.reviewsCount) || 0),
+        ratingsByAccount: existing?.ratingsByAccount && typeof existing.ratingsByAccount === 'object'
+            ? existing.ratingsByAccount
+            : {},
+    };
+
+    productStats[id] = safeStats;
+    return safeStats;
+}
+
+function getValidRatingCount(stats: ProductStats): number {
+    return Object.values(stats.ratingsByAccount).filter(value => parseRating(value) > 2).length;
+}
+
+function getRatingBonus(stats: ProductStats): number {
+    let currentRating = clamp(stats.baseRating, 0, 5);
+    let bonus = 0;
+    const ratings = Object.values(stats.ratingsByAccount)
+        .map(parseRating)
+        .filter(rating => rating > 2)
+        .sort((a, b) => b - a);
+
+    // Each pair comes from different accounts because the object key is the account identity.
+    for (let index = 0; index + 1 < ratings.length; index += 2) {
+        const first = ratings[index];
+        const second = ratings[index + 1];
+
+        if (first === undefined || second === undefined) continue;
+
+        const pairTarget = Math.min(first, second);
+
+        // Ignore ratings that do not exceed the current product rating.
+        if (pairTarget <= currentRating) continue;
+
+        // An equal pair may add two stars, but never beyond the submitted rating.
+        const requestedBonus = first === second ? 2 : 1;
+        const allowedBonus = Math.min(requestedBonus, pairTarget - currentRating, 5 - currentRating);
+        if (allowedBonus <= 0) continue;
+
+        currentRating += allowedBonus;
+        bonus += allowedBonus;
+        if (currentRating >= 5) break;
+    }
+
+    return bonus;
+}
+
+function getEffectiveProductRating(stats: ProductStats): number {
+    return clamp(stats.baseRating + getRatingBonus(stats), 0, 5);
+}
+
+function applyProductStats(product: Product): void {
+    const stats = getProductStats(product);
+    product.stock = stats.stock;
+    product.purchasesCount = stats.purchasesCount;
+    product.rating = getEffectiveProductRating(stats).toFixed(1);
+}
+
+function persistProductStatsToLoadedProducts(): void {
+    globalProductsList.forEach(applyProductStats);
+    saveProductStats();
+}
+
+function getCurrentAccountRating(productId: string | number): number {
+    const stats = productStats[String(productId)];
+    if (!stats) return 0;
+    return clamp(Number(stats.ratingsByAccount[getAccountIdentity()] || 0), 0, 5);
+}
+
+function updateProductRating(productId: string | number, rating: number): void {
+    const product = globalProductsList.find(item => String(item.id) === String(productId));
+    if (!product) return;
+
+    const stats = getProductStats(product);
+    const accountId = getAccountIdentity();
+    const normalizedRating = clamp(Math.round(Number(rating) || 0), 0, 5);
+
+    if (normalizedRating === 0) {
+        delete stats.ratingsByAccount[accountId];
+    } else {
+        stats.ratingsByAccount[accountId] = normalizedRating;
+    }
+
+    applyProductStats(product);
+    saveProductStats();
+    updateMainProductMetrics();
+    renderOrders();
+}
+
 // ==========================================
 // SYNC FUNCTIONS
 // ==========================================
+function updateMainProductMetrics(): void {
+    const cards = document.querySelectorAll<HTMLElement>('.product-card');
+    cards.forEach(card => {
+        const product = globalProductsList.find(item => String(item.id) === String(card.getAttribute('data-id')));
+        if (!product) return;
+
+        const ratingElement = card.querySelector<HTMLElement>('.product-rating');
+        const reviewsElement = card.querySelector<HTMLElement>('.product-reviews');
+        const purchasesElement = card.querySelector<HTMLElement>('.product-purchases');
+        const stockElement = card.querySelector<HTMLElement>('.product-stock');
+        const productState = getProductStats(product);
+        const validRatingsCount = getValidRatingCount(productState);
+        const totalReviewsCount = productState.baseReviewsCount + validRatingsCount;
+
+        if (ratingElement) ratingElement.textContent = product.rating;
+        if (reviewsElement) reviewsElement.textContent = `(${totalReviewsCount})`;
+        if (purchasesElement) purchasesElement.textContent = String(productState.purchasesCount);
+        if (stockElement) stockElement.textContent = String(productState.stock);
+    });
+}
+
 function updateMainProductCardPrices(): void {
     const cards = document.querySelectorAll<HTMLElement>('.product-card');
     cards.forEach(card => {
@@ -200,24 +395,40 @@ function syncMainProductStates(): void {
         const inCart = isProductInCart(productId);
         const inWishlist = isProductInWishlist(productId);
 
+        const product = globalProductsList.find(item => String(item.id) === String(productId));
         const addButton = card.querySelector<HTMLButtonElement>('.btn-add-to-cart');
         const wishlistButton = card.querySelector<HTMLButtonElement>('.btn-wishlist-toggle');
         const wishlistIcon = card.querySelector<HTMLElement>('.wishlist-icon');
+        const quantityInput = productQuantityInputs.get(productId);
+        const decreaseButton = card.querySelector<HTMLButtonElement>('.qty-decrement-btn');
+        const increaseButton = card.querySelector<HTMLButtonElement>('.qty-increment-btn');
+        const outOfStock = !!product && getProductStats(product).stock <= 0;
+
+        // Keep the product card visible and set its quantity to zero when stock runs out.
+        if (quantityInput && outOfStock) {
+            quantityInput.value = '0';
+            quantityInput.min = '0';
+        } else if (quantityInput && quantityInput.value === '0') {
+            quantityInput.value = '1';
+            quantityInput.min = '1';
+        }
+        if (decreaseButton) decreaseButton.disabled = outOfStock;
+        if (increaseButton) increaseButton.disabled = outOfStock;
 
         // Update cart button state
         if (addButton) {
-            addButton.disabled = inCart;
-            addButton.textContent = inCart ? 'In Cart ✓' : 'Add to Cart';
+            addButton.disabled = inCart || outOfStock;
+            addButton.textContent = outOfStock ? 'Out of Stock' : (inCart ? 'In Cart ✓' : 'Add to Cart');
             addButton.classList.toggle('opacity-50', inCart);
             addButton.classList.toggle('cursor-not-allowed', inCart);
-            addButton.classList.toggle('bg-gray-600', inCart);
-            addButton.classList.toggle('text-white', inCart);
-            addButton.classList.toggle('border-gray-600', inCart);
-            addButton.classList.toggle('hover:bg-gh-gold', !inCart);
-            addButton.classList.toggle('hover:text-black', !inCart);
-            addButton.classList.toggle('bg-gh-gold/10', !inCart);
-            addButton.classList.toggle('text-gh-gold', !inCart);
-            addButton.classList.toggle('border-gh-gold/60', !inCart);
+            addButton.classList.toggle('bg-gray-600', inCart || outOfStock);
+            addButton.classList.toggle('text-white', inCart || outOfStock);
+            addButton.classList.toggle('border-gray-600', inCart || outOfStock);
+            addButton.classList.toggle('hover:bg-gh-gold', !inCart && !outOfStock);
+            addButton.classList.toggle('hover:text-black', !inCart && !outOfStock);
+            addButton.classList.toggle('bg-gh-gold/10', !inCart && !outOfStock);
+            addButton.classList.toggle('text-gh-gold', !inCart && !outOfStock);
+            addButton.classList.toggle('border-gh-gold/60', !inCart && !outOfStock);
         }
 
         // Update wishlist heart icon
@@ -229,18 +440,20 @@ function syncMainProductStates(): void {
         }
 
         // Sync quantity input with cart quantity
-        const quantityInput = productQuantityInputs.get(productId);
-        if (quantityInput) {
+        const cartQuantityInput = productQuantityInputs.get(productId);
+        if (cartQuantityInput) {
             const cartItem = ibuy.find(item => String(item.id) === String(productId));
             if (cartItem) {
-                quantityInput.value = String(cartItem.quantity || 1);
-            } else {
-                quantityInput.value = '1';
+                cartQuantityInput.value = String(cartItem.quantity || 1);
+            } else if (!outOfStock) {
+                cartQuantityInput.value = '1';
+                cartQuantityInput.min = '1';
             }
         }
     });
 
-    // Issue 6: Update prices when currency changes
+    // Refresh metrics and prices after cart or purchase changes.
+    updateMainProductMetrics();
     updateMainProductCardPrices();
 }
 
@@ -270,7 +483,7 @@ function syncWishlistButtonStates(): void {
 }
 
 function updateProductQuantityInput(productId: string | number, quantity: number): void {
-    const input = productQuantityInputs.get(productId);
+    const input = productQuantityInputs.get(String(productId));
     if (input) {
         input.value = String(quantity);
     }
@@ -282,9 +495,16 @@ function syncQuantityWithCart(productId: string | number, quantity: number): voi
     if (!cartItem) return;
 
     const product = globalProductsList.find(item => String(item.id) === String(productId));
-    const safeLimit = product ? Math.max(1, product.stock) : Math.max(1, Number(cartItem.stock) || 1);
-    const safeQuantity = Math.min(Math.max(1, Number(quantity) || 1), safeLimit);
+    const safeLimit = product ? Math.max(0, Number(product.stock) || 0) : Math.max(0, Number(cartItem.stock) || 0);
+    if (safeLimit === 0) {
+        ibuy = ibuy.filter(item => String(item.id) !== String(productId));
+        saveCart();
+        filtersuggestions(globalProductsList);
+        addtocart();
+        return;
+    }
 
+    const safeQuantity = Math.min(Math.max(1, Number(quantity) || 1), safeLimit);
     cartItem.quantity = safeQuantity;
     if (product) {
         cartItem.stock = product.stock;
@@ -294,6 +514,358 @@ function syncQuantityWithCart(productId: string | number, quantity: number): voi
     addtocart();
     syncMainProductStates();
     syncWishlistButtonStates();
+}
+
+// ==========================================
+// ORDERS: SNAPSHOT, RENDERING & RATINGS
+// ==========================================
+function createOrderId(): string {
+    return `order_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function getOrderTotal(items: CartItem[]): { totalQuantity: number; totalPrice: number } {
+    return items.reduce((totals, item) => {
+        const quantity = Math.max(1, Number(item.quantity) || 1);
+        const unitPrice = typeof item.price === 'number'
+            ? item.price
+            : Number.parseFloat(String(item.price)) || 0;
+        totals.totalQuantity += quantity;
+        totals.totalPrice += unitPrice * quantity;
+        return totals;
+    }, { totalQuantity: 0, totalPrice: 0 });
+}
+
+function getNextOrderNumber(): number {
+    const highestExistingNumber = userOrders.reduce((highest, order) => {
+        const value = Number(order.orderNumber);
+        return Number.isFinite(value) ? Math.max(highest, value) : highest;
+    }, 0);
+    return highestExistingNumber + 1;
+}
+
+function createOrderRecord(items: CartItem[], createdAt = Date.now()): OrderRecord {
+    const totals = getOrderTotal(items);
+    const products: OrderProductSnapshot[] = items.map(item => {
+        const quantity = Math.max(1, Number(item.quantity) || 1);
+        const unitPrice = typeof item.price === 'number' ? item.price : Number.parseFloat(String(item.price)) || 0;
+        const snapshot: OrderProductSnapshot = {
+            id: item.id,
+            title: item.nameAr || item.nameEn || item.title || 'Product',
+            quantity,
+            unitPrice,
+            itemTotalPrice: unitPrice * quantity,
+        };
+
+        if (typeof item.img === 'string' && item.img.trim() !== '') {
+            snapshot.image = item.img;
+        }
+
+        return snapshot;
+    });
+
+    return {
+        id: createOrderId(),
+        orderNumber: getNextOrderNumber(),
+        currency: localStorage.getItem('coin') || 'SAR',
+        totalQuantity: totals.totalQuantity,
+        totalPrice: Number(totals.totalPrice.toFixed(2)),
+        time: new Date(createdAt).toLocaleString(),
+        createdAt,
+        products,
+    };
+}
+
+interface OrderTemplateData {
+    id: string;
+    orderNumber: number;
+    currency: string;
+    totalQuantity: number;
+    totalPrice: number;
+    time: string;
+    products: OrderProductSnapshot[];
+}
+
+function renderOrderTemplate(data: OrderTemplateData): string {
+    const productsHTML = data.products.map(product => {
+        const currentRating = getCurrentAccountRating(product.id);
+        const title = escapeHTML(product.title);
+        const image = product.image ? escapeHTML(product.image) : '';
+        const safeId = escapeHTML(product.id);
+
+        return `
+            <div class="order-product-row product-click-trigger cursor-pointer flex items-center gap-2 border-b border-gh-gold/30 py-2" data-product-id="${safeId}">
+                <div class="w-9 h-9 rounded overflow-hidden bg-black/10 shrink-0">
+                    <img src="${image || 'https://via.placeholder.com/80'}" alt="${title}" class="w-full h-full object-cover" loading="lazy">
+                </div>
+                <div class="flex flex-col min-w-0 flex-1">
+                    <h4 class="text-xs font-medium text-[var(--text)] truncate" title="${title}">${title}</h4>
+                    <span class="text-[11px] text-[var(--text-dim)]">Qty: <strong class="text-gh-gold">${product.quantity}</strong></span>
+                    <span class="text-[10px] text-gh-gold">${product.itemTotalPrice.toFixed(2)} ${escapeHTML(data.currency)}</span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0" data-order-rating="${safeId}">
+                    <button type="button" data-rating-action="decrease" data-order-id="${escapeHTML(data.id)}" data-product-id="${safeId}"
+                        class="order-rating-arrow w-6 h-6 rounded-full border border-gh-line text-[var(--text-dim)] hover:text-gh-gold transition-colors" aria-label="Decrease rating">↓</button>
+                    <span class="order-rating-value min-w-[32px] text-center text-xs text-gh-gold" aria-label="Rating">★ ${currentRating}</span>
+                    <button type="button" data-rating-action="increase" data-order-id="${escapeHTML(data.id)}" data-product-id="${safeId}"
+                        class="order-rating-arrow w-6 h-6 rounded-full border border-gh-line text-[var(--text-dim)] hover:text-gh-gold transition-colors" aria-label="Increase rating">↑</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    return `
+        <article class="order-card bg-[var(--bg-card)] border border-gh-line rounded-xl p-3 flex flex-col gap-2 w-full" data-order-id="${escapeHTML(data.id)}">
+            <div class="border-b border-gh-line/50 pb-2 flex flex-col gap-1">
+                <div class="flex items-center justify-between gap-2">
+                    <strong class="text-sm tracking-wide text-gh-gold">Order ${data.orderNumber}</strong>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-[var(--text-dim)]">${escapeHTML(data.time)}</span>
+                        <button type="button" data-print-order="${escapeHTML(data.id)}"
+                            class="order-print-btn border border-gh-gold/40 text-gh-gold rounded-full px-2 py-1 text-[10px] hover:bg-gh-gold hover:text-black transition-colors">
+                            Print
+                        </button>
+                    </div>
+                </div>
+                <span class="text-[10px] text-gh-gold">This order is final and cannot be returned.</span>
+            </div>
+            <div class="max-h-56 overflow-y-auto pr-1 flex flex-col gap-1">
+                ${productsHTML}
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-gh-gold/60">
+                <span class="text-[11px] text-[var(--text-dim)]">Total Qty: <strong class="text-gh-gold">${data.totalQuantity}</strong></span>
+                <span class="text-xs font-semibold text-gh-gold">Total: ${data.totalPrice.toFixed(2)} ${escapeHTML(data.currency)}</span>
+            </div>
+            <div class="text-[10px] text-[var(--text-dim)] opacity-70">
+                <span>Ratings above two stars count as valid.</span>
+            </div>
+        </article>
+    `;
+}
+
+function createOrderHTML(items: CartItem[], orderId = createOrderId()): string {
+    const order = createOrderRecord(items);
+    order.id = orderId;
+    return renderOrderTemplate(order);
+}
+
+function normalizeOrderNumbers(): void {
+    let nextNumber = 1;
+    const ordered = [...userOrders].sort((a, b) => Number(a.createdAt || 0) - Number(b.createdAt || 0));
+
+    ordered.forEach(order => {
+        const existingNumber = Number(order.orderNumber);
+        if (Number.isFinite(existingNumber) && existingNumber > 0) {
+            nextNumber = Math.max(nextNumber, existingNumber + 1);
+        } else {
+            order.orderNumber = nextNumber;
+            nextNumber += 1;
+        }
+    });
+
+    saveOrders();
+}
+
+function renderOrders(): void {
+    if (!userOrdersContainer) return;
+    normalizeOrderNumbers();
+
+    userOrdersContainer.querySelectorAll('.order-card').forEach(card => card.remove());
+
+    if (emptyOrdersNotice) {
+        emptyOrdersNotice.innerHTML = `
+            <div>
+                <i class="ri-inbox-archive-line text-3xl mb-2 opacity-40 text-gh-gold"></i>
+                <p class="text-xs font-normal">No orders yet.</p>
+            </div>
+        `;
+    }
+
+    if (userOrders.length === 0) {
+        emptyOrdersNotice?.classList.remove('hidden');
+    } else {
+        emptyOrdersNotice?.classList.add('hidden');
+        const ordersHTML = [...userOrders]
+            .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))
+            .map(order => renderOrderTemplate(order))
+            .join('');
+        userOrdersContainer.insertAdjacentHTML('beforeend', ordersHTML);
+    }
+
+    if (ordersCountBadge) {
+        ordersCountBadge.textContent = `${userOrders.length} Order${userOrders.length === 1 ? '' : 's'}`;
+    }
+}
+
+function showPurchaseMessage(message: string, isError = true): void {
+    if (!btnCheckout) return;
+
+    let messageElement = document.getElementById('purchaseStatusMessage') as HTMLElement | null;
+    if (!messageElement) {
+        messageElement = document.createElement('p');
+        messageElement.id = 'purchaseStatusMessage';
+        messageElement.className = 'text-[11px] mt-2';
+        btnCheckout.parentElement?.appendChild(messageElement);
+    }
+
+    messageElement.textContent = message;
+    messageElement.classList.toggle('text-red-400', isError);
+    messageElement.classList.toggle('text-gh-gold', !isError);
+}
+
+function completePurchase(): boolean {
+    if (ibuy.length === 0) {
+        showPurchaseMessage('Your cart is empty.');
+        return false;
+    }
+
+    const purchaseItems = ibuy.map(item => ({ ...item, quantity: Math.max(1, Number(item.quantity) || 1) }));
+    const unavailableProduct = purchaseItems.find(item => {
+        const product = globalProductsList.find(entry => String(entry.id) === String(item.id));
+        return !product || item.quantity! > Math.max(0, product.stock);
+    });
+
+    if (unavailableProduct) {
+        showPurchaseMessage('Some requested quantities are no longer available. The cart was updated.');
+        const product = globalProductsList.find(entry => String(entry.id) === String(unavailableProduct.id));
+        if (product) {
+            const cartItem = ibuy.find(item => String(item.id) === String(product.id));
+            if (cartItem) cartItem.quantity = Math.min(cartItem.quantity || 1, Math.max(0, product.stock));
+            if (product.stock <= 0) ibuy = ibuy.filter(item => String(item.id) !== String(product.id));
+            saveCart();
+            filtersuggestions(globalProductsList);
+            addtocart();
+        }
+        return false;
+    }
+
+    const createdAt = Date.now();
+    const order = createOrderRecord(purchaseItems, createdAt);
+
+    // Create the order record first, then reduce stock with no rollback after success.
+    purchaseItems.forEach(item => {
+        const product = globalProductsList.find(entry => String(entry.id) === String(item.id));
+        if (!product) return;
+
+        const stats = getProductStats(product);
+        stats.stock = Math.max(0, stats.stock - (item.quantity || 1));
+        stats.purchasesCount += 1;
+        applyProductStats(product);
+    });
+
+    userOrders.unshift(order);
+    ibuy = [];
+    saveOrders();
+    saveCart();
+    saveProductStats();
+
+    filtersuggestions(globalProductsList);
+    addtocart();
+    renderWishlist();
+    renderOrders();
+    updateMainProductMetrics();
+    syncMainProductStates();
+    syncWishlistButtonStates();
+    // The success state is shown in the order header, not in the cart.
+    return true;
+}
+
+function printOrder(orderId: string): void {
+    const order = userOrders.find(entry => entry.id === orderId);
+    if (!order) return;
+
+    const printWindow = window.open('', '_blank', 'width=800,height=900');
+    if (!printWindow) return;
+
+    const rows = order.products.map(product => `
+        <tr>
+            <td class="product-cell"><img src="${product.image ? escapeHTML(product.image) : 'https://via.placeholder.com/56'}" alt="${escapeHTML(product.title)}"></td>
+            <td>${escapeHTML(product.title)}</td>
+            <td>${product.quantity}</td>
+            <td>${product.unitPrice.toFixed(2)} ${escapeHTML(order.currency)}</td>
+            <td>${product.itemTotalPrice.toFixed(2)} ${escapeHTML(order.currency)}</td>
+        </tr>
+    `).join('');
+
+    printWindow.document.write(`<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GHALLAB SHOP - Order ${order.orderNumber}</title>
+<style>
+    *{box-sizing:border-box} body{margin:0;padding:32px;background:#fff;color:#171717;font-family:Arial,Helvetica,sans-serif}
+    .invoice{max-width:760px;margin:0 auto;border:1px solid #d8c48b;border-radius:16px;padding:28px}
+    .brand{display:flex;align-items:center;gap:12px;border-bottom:2px solid #caa84e;padding-bottom:18px;margin-bottom:22px}
+    .logo{width:42px;height:42px;border:2px solid #caa84e;border-radius:50%;display:grid;place-items:center;color:#caa84e;font-size:25px}
+    .brand-name{font-size:20px;letter-spacing:3px;font-weight:700}.meta{display:flex;justify-content:space-between;gap:16px;margin-bottom:20px;font-size:13px}
+    table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;background:#f8f3e5;color:#765b16;padding:10px}td{padding:10px;border-bottom:1px solid #e6d8ac;vertical-align:middle}.product-cell{width:58px}.product-cell img{width:42px;height:42px;object-fit:cover;border-radius:7px}
+    .summary{display:flex;justify-content:space-between;border-top:2px solid #caa84e;margin-top:18px;padding-top:14px;font-weight:700}.note{margin-top:22px;color:#765b16;font-size:12px;text-align:center}
+    @media print{body{padding:0}.invoice{border:0;max-width:none}}
+</style>
+</head>
+<body>
+    <main class="invoice">
+        <header class="brand"><div class="logo">✿</div><div class="brand-name">GHALLAB SHOP</div></header>
+        <div class="meta"><span><strong>Order:</strong> ${order.orderNumber}</span><span><strong>Created at:</strong> ${escapeHTML(order.time)}</span></div>
+        <table>
+            <thead><tr><th>Image</th><th>Product</th><th>Quantity</th><th>Unit Price</th><th>Total</th></tr></thead>
+            <tbody>${rows}</tbody>
+        </table>
+        <div class="summary"><span>Total Quantity: ${order.totalQuantity}</span><span>Total: ${order.totalPrice.toFixed(2)} ${escapeHTML(order.currency)}</span></div>
+        <div class="note">This order is final and cannot be returned.</div>
+    </main>
+</body>
+</html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+}
+
+function handleOrderRatingClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+
+    const printButton = target.closest<HTMLButtonElement>('[data-print-order]');
+    if (printButton) {
+        const orderId = printButton.getAttribute('data-print-order');
+        if (orderId) printOrder(orderId);
+        return;
+    }
+
+    const button = target.closest<HTMLButtonElement>('[data-rating-action]');
+    if (!button) return;
+
+    const productId = button.getAttribute('data-product-id');
+    const action = button.getAttribute('data-rating-action');
+    if (!productId || (action !== 'increase' && action !== 'decrease')) return;
+
+    const currentRating = getCurrentAccountRating(productId);
+    const nextRating = action === 'increase'
+        ? Math.min(5, currentRating + 1)
+        : Math.max(0, currentRating - 1);
+
+    updateProductRating(productId, nextRating);
+}
+
+if (userOrdersContainer) {
+    userOrdersContainer.addEventListener('click', (event: MouseEvent) => {
+        const target = event.target as HTMLElement;
+        if (target.closest('[data-rating-action]') || target.closest('[data-print-order]')) {
+            handleOrderRatingClick(event);
+            return;
+        }
+
+        const productId = target.closest('[data-product-id]')?.getAttribute('data-product-id');
+        if (productId) scrollToProductCard(productId);
+    });
+}
+
+if (btnCheckout) {
+    // Convert the existing HTML button into a purchase-only button.
+    btnCheckout.querySelector('i')?.remove();
+    btnCheckout.textContent = 'Buy';
+    btnCheckout.addEventListener('click', () => {
+        completePurchase();
+    });
 }
 
 // ==========================================
@@ -341,6 +913,18 @@ function createWishlistItemHTML(item: WishlistItem): string {
 function renderWishlist(): void {
     if (!wishGrid || !wishlistEmptyMsg) return;
 
+    // Out-of-stock products stay in the main catalog but never remain in the wishlist.
+    if (globalProductsList.length > 0) {
+        const availableWishlistItems = wishlistItems.filter(item => {
+            const product = globalProductsList.find(entry => String(entry.id) === String(item.id));
+            return !product || getProductStats(product).stock > 0;
+        });
+        if (availableWishlistItems.length !== wishlistItems.length) {
+            wishlistItems = availableWishlistItems;
+            saveWishlist();
+        }
+    }
+
     if (wishlistItems.length === 0) {
         wishlistEmptyMsg.classList.remove('hidden');
         wishGrid.innerHTML = '';
@@ -350,6 +934,7 @@ function renderWishlist(): void {
     }
 
     syncWishlistButtonStates();
+    syncMainProductStates();
 
     if (wishBadge) wishBadge.textContent = String(wishlistItems.length);
 }
@@ -495,7 +1080,8 @@ function filtersuggestions(allProducts: Product[]): void {
     const matchedProducts: Product[] = allProducts.filter(product => {
         const matchesCategory = cartCategoryNames.includes(product.categoryEn);
         const isAlreadyInCart = ibuy.some(item => String(item.id) === String(product.id));
-        return matchesCategory && !isAlreadyInCart;
+        const isAvailable = Math.max(0, Number(product.stock) || 0) > 0;
+        return matchesCategory && !isAlreadyInCart && isAvailable;
     });
 
     // Sort by rating descending
@@ -508,7 +1094,16 @@ function filtersuggestions(allProducts: Product[]): void {
 // Adds product to cart. If already in cart, increments quantity unless an explicit input is given.
 function addToCart(product: Product, quantityInput: HTMLInputElement | null, allProducts: Product[]): void {
     const existingItem = ibuy.find(item => String(item.id) === String(product.id));
-    const maxAllowed = Math.max(1, product.stock || 1);
+    const maxAllowed = Math.max(0, Number(product.stock) || 0);
+    if (maxAllowed === 0) {
+        ibuy = ibuy.filter(item => String(item.id) !== String(product.id));
+        saveCart();
+        filtersuggestions(allProducts);
+        addtocart();
+        syncMainProductStates();
+        return;
+    }
+
     let qty = quantityInput
         ? Math.max(1, Number(quantityInput.value) || 1)
         : existingItem
@@ -594,8 +1189,9 @@ if (productTemplate && productGrid) {
     fetch('/products.json')
         .then(response => response.json())
         .then((products: Product[]) => {
-            globalProductsList = products;
-            // Sort by rating descending by default
+            globalProductsList = products.map(product => ({ ...product }));
+            persistProductStatsToLoadedProducts();
+            // Sort by rating descending by default.
             globalProductsList.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
             productGrid.innerHTML = '';
             globalProductsList.forEach(product => {
@@ -640,7 +1236,7 @@ if (productTemplate && productGrid) {
                 const increaseQuantityBtn = clone.querySelector('.qty-increment-btn') as HTMLButtonElement | null;
 
                 if (quantityInput) {
-                    productQuantityInputs.set(product.id, quantityInput);
+                    productQuantityInputs.set(String(product.id), quantityInput);
                 }
 
                 if (decreaseQuantityBtn && quantityInput && increaseQuantityBtn) {
@@ -694,6 +1290,8 @@ if (productTemplate && productGrid) {
                     }
 
                     wishlistToggleBtn.addEventListener('click', () => {
+                        if (getProductStats(product).stock <= 0) return;
+
                         const index = wishlistItems.findIndex(item => String(item.id) === String(product.id));
 
                         if (index === -1) {
@@ -727,10 +1325,17 @@ if (productTemplate && productGrid) {
                 productGrid.appendChild(clone);
             });
 
-            filtersuggestions(products);
+            // Remove zero-stock items from the cart only; keep their original cards visible at quantity zero.
+            ibuy = ibuy.filter(item => {
+                const product = globalProductsList.find(entry => String(entry.id) === String(item.id));
+                return !product || getProductStats(product).stock > 0;
+            });
+            saveCart();
+            filtersuggestions(globalProductsList);
             addtocart();
             syncMainProductStates();
             renderWishlist();
+            renderOrders();
         })
         .catch(error => {
             console.error('Error fetching products:', error);
@@ -758,14 +1363,23 @@ if (cartItemsList) {
                 addtocart();
                 syncMainProductStates();
                 syncWishlistButtonStates();
-                const input = productQuantityInputs.get(id);
+                const input = productQuantityInputs.get(String(id));
                 if (input) input.value = '1';
             } else if (action === 'increase' || action === 'decrease') {
                 const item = ibuy.find(entry => String(entry.id) === id);
                 if (!item) return;
 
                 const product = globalProductsList.find(entry => String(entry.id) === String(id));
-                const stockLimit = product ? Math.max(1, product.stock) : Math.max(1, Number(item.stock) || 1);
+                const stockLimit = product ? Math.max(0, Number(product.stock) || 0) : Math.max(0, Number(item.stock) || 0);
+                if (stockLimit === 0) {
+                    ibuy = ibuy.filter(entry => String(entry.id) !== id);
+                    saveCart();
+                    filtersuggestions(globalProductsList);
+                    addtocart();
+                    syncMainProductStates();
+                    updateProductQuantityInput(id, 0);
+                    return;
+                }
                 let nextQty = action === 'increase' ? (item.quantity || 1) + 1 : Math.max(1, (item.quantity || 1) - 1);
 
                 nextQty = Math.min(Math.max(1, nextQty), stockLimit);
@@ -856,6 +1470,7 @@ if (wishGrid) {
 // INITIAL RENDER (on DOM ready)
 // ==========================================
 function initialRender(): void {
+    renderOrders();
     ibuy = ibuy.map(item => {
         const product = globalProductsList.find(entry => String(entry.id) === String(item.id));
         const maxAllowed = product ? Math.max(1, product.stock) : Math.max(1, Number(item.stock) || 1);
