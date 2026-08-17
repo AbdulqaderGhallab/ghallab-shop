@@ -414,21 +414,15 @@ function getNextOrderNumber() {
 }
 function createOrderRecord(items, createdAt = Date.now()) {
     const totals = getOrderTotal(items);
-    const products = items.map(item => {
-        const quantity = Math.max(1, Number(item.quantity) || 1);
-        const unitPrice = typeof item.price === 'number' ? item.price : Number.parseFloat(String(item.price)) || 0;
-        const snapshot = {
-            id: item.id,
-            title: item.nameAr || item.nameEn || item.title || 'Product',
-            quantity,
-            unitPrice,
-            itemTotalPrice: unitPrice * quantity,
-        };
-        if (typeof item.img === 'string' && item.img.trim() !== '') {
-            snapshot.image = item.img;
-        }
-        return snapshot;
-    });
+    const products = items.map(item => ({
+        id: item.id,
+        title: item.nameAr || item.nameEn || item.title || 'Product',
+        image: item.img || '',
+        quantity: Math.max(1, Number(item.quantity) || 1),
+        unitPrice: typeof item.price === 'number' ? item.price : Number.parseFloat(String(item.price)) || 0,
+        itemTotalPrice: (typeof item.price === 'number' ? item.price : Number.parseFloat(String(item.price)) || 0)
+            * Math.max(1, Number(item.quantity) || 1),
+    }));
     return {
         id: createOrderId(),
         orderNumber: getNextOrderNumber(),
@@ -612,9 +606,9 @@ function printOrder(orderId) {
     const order = userOrders.find(entry => entry.id === orderId);
     if (!order)
         return;
-    const printWindow = window.open('', '_blank', 'width=800,height=900');
-    if (!printWindow)
-        return;
+    document.querySelector('.market-print-invoice')?.remove();
+    document.getElementById('market-print-style')?.remove();
+    document.body.classList.remove('printing-market-order');
     const rows = order.products.map(product => `
         <tr>
             <td class="product-cell"><img src="${product.image ? escapeHTML(product.image) : 'https://via.placeholder.com/56'}" alt="${escapeHTML(product.title)}"></td>
@@ -624,25 +618,34 @@ function printOrder(orderId) {
             <td>${product.itemTotalPrice.toFixed(2)} ${escapeHTML(order.currency)}</td>
         </tr>
     `).join('');
-    printWindow.document.write(`<!doctype html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>GHALLAB SHOP - Order ${order.orderNumber}</title>
-<style>
-    *{box-sizing:border-box} body{margin:0;padding:32px;background:#fff;color:#171717;font-family:Arial,Helvetica,sans-serif}
-    .invoice{max-width:760px;margin:0 auto;border:1px solid #d8c48b;border-radius:16px;padding:28px}
-    .brand{display:flex;align-items:center;gap:12px;border-bottom:2px solid #caa84e;padding-bottom:18px;margin-bottom:22px}
-    .logo{width:42px;height:42px;border:2px solid #caa84e;border-radius:50%;display:grid;place-items:center;color:#caa84e;font-size:25px}
-    .brand-name{font-size:20px;letter-spacing:3px;font-weight:700}.meta{display:flex;justify-content:space-between;gap:16px;margin-bottom:20px;font-size:13px}
-    table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;background:#f8f3e5;color:#765b16;padding:10px}td{padding:10px;border-bottom:1px solid #e6d8ac;vertical-align:middle}.product-cell{width:58px}.product-cell img{width:42px;height:42px;object-fit:cover;border-radius:7px}
-    .summary{display:flex;justify-content:space-between;border-top:2px solid #caa84e;margin-top:18px;padding-top:14px;font-weight:700}.note{margin-top:22px;color:#765b16;font-size:12px;text-align:center}
-    @media print{body{padding:0}.invoice{border:0;max-width:none}}
-</style>
-</head>
-<body>
-    <main class="invoice">
-        <header class="brand"><div class="logo">✿</div><div class="brand-name">GHALLAB SHOP</div></header>
+    const printStyle = document.createElement('style');
+    printStyle.id = 'market-print-style';
+    printStyle.textContent = `
+        @media screen { .market-print-invoice { display: none !important; } }
+        @media print {
+            body.printing-market-order > *:not(.market-print-invoice) { display: none !important; }
+            body.printing-market-order { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+            body.printing-market-order .market-print-invoice { display: block !important; }
+            .market-print-invoice, .market-print-invoice * { box-sizing: border-box; }
+            .market-print-invoice { display: block; width: 100%; max-width: 760px; margin: 0 auto; padding: 28px; background: #fff; color: #171717; font-family: Arial, Helvetica, sans-serif; }
+            .market-print-invoice .brand { border-bottom: 2px solid #caa84e; padding-bottom: 18px; margin-bottom: 22px; }
+            .market-print-invoice .brand-name { color: #171717; font-size: 20px; letter-spacing: 3px; font-weight: 700; }
+            .market-print-invoice .meta { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 20px; font-size: 13px; }
+            .market-print-invoice table { width: 100%; border-collapse: collapse; font-size: 13px; }
+            .market-print-invoice th { text-align: left; background: #f8f3e5; color: #765b16; padding: 10px; }
+            .market-print-invoice td { padding: 10px; border-bottom: 1px solid #e6d8ac; vertical-align: middle; }
+            .market-print-invoice .product-cell { width: 58px; }
+            .market-print-invoice .product-cell img { width: 42px; height: 42px; object-fit: cover; border-radius: 7px; }
+            .market-print-invoice .summary { display: flex; justify-content: space-between; border-top: 2px solid #caa84e; margin-top: 18px; padding-top: 14px; font-weight: 700; }
+            .market-print-invoice .note { margin-top: 22px; color: #765b16; font-size: 12px; text-align: center; }
+            @page { margin: 12mm; size: auto; }
+        }
+    `;
+    const printInvoice = document.createElement('section');
+    printInvoice.className = 'market-print-invoice';
+    printInvoice.setAttribute('aria-hidden', 'true');
+    printInvoice.innerHTML = `
+        <header class="brand"><div class="brand-name">GHALLAB SHOP</div></header>
         <div class="meta"><span><strong>Order:</strong> ${order.orderNumber}</span><span><strong>Created at:</strong> ${escapeHTML(order.time)}</span></div>
         <table>
             <thead><tr><th>Image</th><th>Product</th><th>Quantity</th><th>Unit Price</th><th>Total</th></tr></thead>
@@ -650,13 +653,24 @@ function printOrder(orderId) {
         </table>
         <div class="summary"><span>Total Quantity: ${order.totalQuantity}</span><span>Total: ${order.totalPrice.toFixed(2)} ${escapeHTML(order.currency)}</span></div>
         <div class="note">This order is final and cannot be returned.</div>
-    </main>
-</body>
-</html>`);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+    `;
+    document.head.appendChild(printStyle);
+    document.body.appendChild(printInvoice);
+    document.body.classList.add('printing-market-order');
+    let cleaned = false;
+    const cleanup = () => {
+        if (cleaned)
+            return;
+        cleaned = true;
+        document.body.classList.remove('printing-market-order');
+        printInvoice.remove();
+        printStyle.remove();
+        window.removeEventListener('afterprint', cleanup);
+    };
+    window.addEventListener('afterprint', cleanup, { once: true });
+    window.setTimeout(cleanup, 30000);
+    // Called directly from the user click for better mobile browser compatibility.
+    window.print();
 }
 function handleOrderRatingClick(event) {
     const target = event.target;
