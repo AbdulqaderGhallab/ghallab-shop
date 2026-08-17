@@ -766,6 +766,7 @@ function printOrder(orderId: string): void {
 
     document.querySelector('.market-print-invoice')?.remove();
     document.getElementById('market-print-style')?.remove();
+    document.documentElement.classList.remove('printing-market-order');
     document.body.classList.remove('printing-market-order');
 
     const rows = order.products.map(product => `
@@ -783,21 +784,49 @@ function printOrder(orderId: string): void {
     printStyle.textContent = `
         @media screen { .market-print-invoice { display: none !important; } }
         @media print {
-            body.printing-market-order > *:not(.market-print-invoice) { display: none !important; }
-            body.printing-market-order { margin: 0 !important; padding: 0 !important; background: #fff !important; }
-            body.printing-market-order .market-print-invoice { display: block !important; }
+            html.printing-market-order body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+            html.printing-market-order body > *:not(.market-print-invoice) { display: none !important; visibility: hidden !important; }
+            html.printing-market-order .market-print-invoice,
+            html.printing-market-order .market-print-invoice * { display: revert !important; visibility: visible !important; }
+            html.printing-market-order body > .market-print-invoice {
+                display: block !important;
+                position: static !important;
+                width: 100% !important;
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                overflow: visible !important;
+                margin: 0 !important;
+            }
             .market-print-invoice, .market-print-invoice * { box-sizing: border-box; }
-            .market-print-invoice { display: block; width: 100%; max-width: 760px; margin: 0 auto; padding: 28px; background: #fff; color: #171717; font-family: Arial, Helvetica, sans-serif; }
-            .market-print-invoice .brand { border-bottom: 2px solid #caa84e; padding-bottom: 18px; margin-bottom: 22px; }
-            .market-print-invoice .brand-name { color: #171717; font-size: 20px; letter-spacing: 3px; font-weight: 700; }
-            .market-print-invoice .meta { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 20px; font-size: 13px; }
-            .market-print-invoice table { width: 100%; border-collapse: collapse; font-size: 13px; }
-            .market-print-invoice th { text-align: left; background: #f8f3e5; color: #765b16; padding: 10px; }
-            .market-print-invoice td { padding: 10px; border-bottom: 1px solid #e6d8ac; vertical-align: middle; }
+            .market-print-invoice tr, .market-print-invoice img { break-inside: avoid; page-break-inside: avoid; }
+            .market-print-invoice { display: block; width: 100%; max-width: 780px; margin: 0 auto; padding: 18px; background: #fff; color: #171717; font-family: Arial, Helvetica, sans-serif; }
+            .market-print-invoice .invoice-card { border: 1px solid #d8c48b; border-radius: 14px; padding: 24px; background: #fff; }
+            .market-print-invoice .invoice-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; border-bottom: 2px solid #caa84e; padding-bottom: 16px; }
+            .market-print-invoice .brand-name { color: #171717; font-size: 22px; letter-spacing: 2px; font-weight: 700; }
+            .market-print-invoice .invoice-title { color: #765b16; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; margin-top: 5px; }
+            .market-print-invoice .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0; font-size: 13px; }
+            .market-print-invoice .meta-item { display: flex; flex-direction: column; gap: 5px; border: 1px solid #e6d8ac; border-radius: 8px; padding: 10px 12px; min-width: 0; }
+            .market-print-invoice .meta-item:last-child { text-align: right; align-items: flex-end; }
+            .market-print-invoice .meta-label, .market-print-invoice .summary-label { color: #765b16; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+            .market-print-invoice .meta-value { font-weight: 700; overflow-wrap: anywhere; }
+            .market-print-invoice table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            .market-print-invoice th { text-align: left; background: #f8f3e5; color: #765b16; padding: 10px 8px; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+            .market-print-invoice td { padding: 10px 8px; border-bottom: 1px solid #e6d8ac; vertical-align: middle; }
             .market-print-invoice .product-cell { width: 58px; }
-            .market-print-invoice .product-cell img { width: 42px; height: 42px; object-fit: cover; border-radius: 7px; }
-            .market-print-invoice .summary { display: flex; justify-content: space-between; border-top: 2px solid #caa84e; margin-top: 18px; padding-top: 14px; font-weight: 700; }
-            .market-print-invoice .note { margin-top: 22px; color: #765b16; font-size: 12px; text-align: center; }
+            .market-print-invoice .product-cell img { display: block; width: 42px; height: 42px; object-fit: cover; border-radius: 7px; }
+            .market-print-invoice .summary { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-top: 2px solid #caa84e; margin-top: 18px; padding-top: 16px; }
+            .market-print-invoice .summary-item { display: flex; flex-direction: column; gap: 5px; border: 1px solid #e6d8ac; border-radius: 8px; padding: 11px 12px; }
+            .market-print-invoice .summary-item:last-child { text-align: right; align-items: flex-end; }
+            .market-print-invoice .summary-value { font-size: 16px; font-weight: 700; color: #171717; }
+            .market-print-invoice .note { margin: 18px 0 0; color: #765b16; font-size: 11px; text-align: center; }
+            @media print and (max-width: 640px) {
+                .market-print-invoice { padding: 0; }
+                .market-print-invoice .invoice-card { border: 0; border-radius: 0; padding: 14px; }
+                .market-print-invoice .brand-name { font-size: 18px; }
+                .market-print-invoice th, .market-print-invoice td { padding: 7px 4px; }
+                .market-print-invoice table { font-size: 10px; }
+            }
             @page { margin: 12mm; size: auto; }
         }
     `;
@@ -806,24 +835,39 @@ function printOrder(orderId: string): void {
     printInvoice.className = 'market-print-invoice';
     printInvoice.setAttribute('aria-hidden', 'true');
     printInvoice.innerHTML = `
-        <header class="brand"><div class="brand-name">GHALLAB SHOP</div></header>
-        <div class="meta"><span><strong>Order:</strong> ${order.orderNumber}</span><span><strong>Created at:</strong> ${escapeHTML(order.time)}</span></div>
-        <table>
-            <thead><tr><th>Image</th><th>Product</th><th>Quantity</th><th>Unit Price</th><th>Total</th></tr></thead>
-            <tbody>${rows}</tbody>
-        </table>
-        <div class="summary"><span>Total Quantity: ${order.totalQuantity}</span><span>Total: ${order.totalPrice.toFixed(2)} ${escapeHTML(order.currency)}</span></div>
-        <div class="note">This order is final and cannot be returned.</div>
+        <div class="invoice-card">
+            <header class="invoice-header">
+                <div>
+                    <div class="brand-name">GHALLAB SHOP</div>
+                    <div class="invoice-title">Order Invoice</div>
+                </div>
+            </header>
+            <div class="meta">
+                <div class="meta-item"><span class="meta-label">Order Number:</span><span class="meta-value">${order.orderNumber}</span></div>
+                <div class="meta-item"><span class="meta-label">Created At:</span><span class="meta-value">${escapeHTML(order.time)}</span></div>
+            </div>
+            <table>
+                <thead><tr><th>Image</th><th>Product</th><th>Quantity</th><th>Unit Price</th><th>Total</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+            <div class="summary">
+                <div class="summary-item"><span class="summary-label">Total Quantity:</span><span class="summary-value">${order.totalQuantity}</span></div>
+                <div class="summary-item"><span class="summary-label">Total Price:</span><span class="summary-value">${order.totalPrice.toFixed(2)} ${escapeHTML(order.currency)}</span></div>
+            </div>
+            <div class="note">This order is final and cannot be returned.</div>
+        </div>
     `;
 
     document.head.appendChild(printStyle);
     document.body.appendChild(printInvoice);
+    document.documentElement.classList.add('printing-market-order');
     document.body.classList.add('printing-market-order');
 
     let cleaned = false;
     const cleanup = (): void => {
         if (cleaned) return;
         cleaned = true;
+        document.documentElement.classList.remove('printing-market-order');
         document.body.classList.remove('printing-market-order');
         printInvoice.remove();
         printStyle.remove();
